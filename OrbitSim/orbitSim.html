@@ -1,0 +1,67 @@
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/css" href="orbitSim.css">
+	<meta name="author" content="Ivan Miloslavov">
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+	<title>Space Elevator Operator</title>
+</head>
+
+<body style="background-color:darkgrey">
+
+	<div style="display:none;">
+		<img src="earth.png" id="earthPic" />
+		<img src="night_sky.png" id="bgPic" />
+		<img src="splash.png" id="splash" />
+	</div>
+	<h1> Space Elevator Operator </h1>
+	<h3> Created by Ivan Miloslavov and Stephen Cohen </h3>
+	<p class="desc">
+	This program presents the orbits that satellites delivered by a Space Elevator would take when released from various launch altitudes along the tether. To start, press 
+	<b>Play</b> and adjust the rate of time lapse.  Create a<b> New Climber </b>and send a payload to the launch altitude of your 
+	choice in however many days of transit you desire.  Send as many climbers as you wish.</p>
+	<p class="desc">If you have questions or ideas for improvment, as well as if you have found bugs, feel free to email Ivan at MiloslavovIvan[at]gmail[dot]com .
+	If you want to know more about the Space Elevator, visit the <a target="_blank" href="http://www.isec.org">International Space Elevator Consortium</a> website.</p>
+	
+	<table id="mainWindow" style="background-color:grey"><tr height="130">
+		<td rowspan="2"><canvas id="animPane" width="720" height="720"></canvas></td>
+		<td style="vertical-align:top;"><div id="simInput">
+			<button type="button" id="playPauseBtn" onclick="playPause(this)">Play</button><br /><br />
+			Speed of simulation: 
+			<input type="number" id="simSpeed" value="5" min="1" max="15" step="0.25" oninput="updateTimeScale(this)"/>
+			hours/s<br />
+			Simulated time: <label id="simTotalTime">0.00</label> days
+		</div></td></tr>
+		<tr ><td style="padding-bottom:10; vertical-align:top;">
+			<div id="statuses">
+				------ Current status ------ <br />
+				<button type="button" id="createClimber" onclick="createClimber()">New</button>
+				<button type="button" id="deleteClimber" onclick="deleteClimber()" disabled>Delete</button><br />
+				<button type="button" id="prevClimber" onclick="changeClimber(-1)" disabled>&lt;&lt;</button>
+				Active Climber 
+				<button type="button" id="nextClimber" onclick="changeClimber(1)" disabled>&gt;&gt;</button>
+				<br />
+				<span id="climberStatus"></span><br /><br />
+				
+				<button type="button" id="prevPayload" onclick="changePayload(-1)" disabled>&lt;&lt;</button>
+				Active Payload
+				<button type="button" id="nextPayload" onclick="changePayload(1)" disabled>&gt;&gt;</button>
+				<br />
+				<span id="payloadStatus"></span>
+				<br /><br />
+				<div id="climberInput" hidden>
+					Launch height: <input type="number" id="launchHeight" value="30000" min="23500" max="99000" step="250" />kms <br />
+					Days to destination: <input type="number" id="launchDays" value="10" min="4" max="50" step="0.5" oninput="correctDays(this)"/> <br />
+					<button type="button" id="sendClimber" onclick="sendClimber()">Send</button>
+				</div>
+			</div>
+		</td></tr>
+	</table>
+<script src="orbitSim.js"></script>
+<noscript>Your browser may not be supporting JavaScript.</noscript>
+
+<!-- START OF HIT COUNTER CODE --><br><script language="JavaScript" src="http://www.counter160.com/js.js?img=13"></script><br><a href="https://www.000webhost.com"><img src="http://www.counter160.com/images/13/left.png" alt="Free web hosting" border="0" align="texttop"></a><a href="http://www.hosting24.com"><img alt="Web hosting" src="http://www.counter160.com/images/13/right.png" border="0" align="texttop"></a><!-- END OF HIT COUNTER CODE -->
+	
+</body>
+
+</html>

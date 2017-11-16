@@ -1,0 +1,56 @@
+	.text
+	.globl __start
+__start:
+	#Greet
+	la $a0, TITLE 
+	li $v0, 4
+	syscall 
+	
+	#Save input and call subroutine
+	li $v0, 5
+	syscall
+	subi $sp, $sp, 4
+	sw $v0, 0($sp)
+	jal FACT
+	move $t0, $v0
+	
+	#Print result 
+	la $a0, ANSWER
+	li $v0, 4
+	syscall
+	
+	move $a0, $t0
+	li $v0, 1
+	syscall
+	
+	la $a0, END
+	li $v0, 4
+	syscall
+	
+	li $v0, 10
+	syscall
+	
+FACT:	
+	#We'll use two saved registers so we push two words into the stack
+	subi $sp, $sp, 8 
+	sw $s0, 4($sp)
+	sw $s1, 0($sp)
+	lw $s0, 8($sp)
+	li $s1, 1
+FACT_LOOP:
+	mul $s1, $s1, $s0
+	subi $s0, $s0, 1
+	bnez $s0, FACT_LOOP
+	
+	#Reload all saved stuff, reset the stack
+	
+	move $v0, $s1
+	lw $s0, 4($sp)
+	lw $s1, 0($sp)
+	addi $sp, $sp, 12
+	jr $ra
+	
+	.data
+TITLE:	.asciiz "Calculate Factorial\nEnter a number: "
+ANSWER: .asciiz "The factorial is "
+END:	.asciiz "\nEND"

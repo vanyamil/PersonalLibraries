@@ -1,0 +1,15 @@
+	.text
+	.globl __start
+__start:
+	lw $t0, YEARS
+	li $t1, 0
+loop:	
+	addi $t1, $t1, 365
+	subi $t0, $t0, 1
+	bnez $t0, loop
+	
+	sw $t1, DAYS
+	
+	.data
+YEARS:	.word 3
+DAYS:	.word
