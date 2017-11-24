@@ -75,7 +75,7 @@ public class IntervalSet {
 		return ret;
 	}
 
-	public Random() {
+	public double Random() {
 		double r = Math.Random(Length);
 		foreach(Tuple<double, double> t in this.Flatten().ints) {
 			r -= (t.Item2 - t.Item1);
@@ -85,7 +85,7 @@ public class IntervalSet {
 		return null;
 	}
 
-	public Reverse() {
+	public IntervalSet Reverse() {
 		if(!this.reverse) {
 			IntervalSet ret = new IntervalSet(this.low, this.high);
 			double start = this.low;
@@ -99,9 +99,9 @@ public class IntervalSet {
 		return this.reverse;
 	}
 
-	public R_Length => Reverse().Length
+	public double R_Length => Reverse().Length
 	
-	public R_Random() {
+	public double R_Random() {
 		return Reverse().Random();
 	} 
 }
