@@ -1,0 +1,4 @@
+AuthName "Reddit stuff"
+AuthUserFile "/home/2016/imilos2/public_html/cgi-bin/.htpasswd"
+AuthType Basic
+require valid-user

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Magic Bracket Stats </title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="mtgb.js?v=161"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<style>
+		.ui-autocomplete {
+		max-height: 100px;
+		overflow-y: auto;
+		/* prevent horizontal scrollbar */
+		overflow-x: hidden;
+		}
+		/* IE 6 doesn't support max-height
+		* we use height instead, but this forces the menu to always be this tall
+		*/
+		* html .ui-autocomplete {
+		height: 100px;
+		}
+
+		.m-0 {
+			margin: 0 !important;
+		}
+
+		.cell {
+			border: 1px solid #6c757d;
+			margin-left: -15px;
+			margin-right: -15px;
+			padding: 2px 4px;
+		}
+
+		.cell-num {
+			font-size: 35px;
+			text-align: center;
+		}
+
+		.cell-text {
+			font-size: 11px;
+			text-align: right;
+			margin-top: -10px;
+		}
+
+		@media (max-width: 991px) {
+			.table-left, .table-right {
+				font-size: 25px;
+			}
+		}
+
+		.table-left {
+			text-align: right;
+			padding-right: 5px;
+			font-weight: bold;
+		}
+
+		.table-right {
+			text-align: left;
+			padding-left: 5px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="page-header">
+			<h2 class="text-center">The Magic Bracket - Stats and Review v1.6.0</h2>
+			<h5 class="text-center">Congratulations to Lightning Bolt!</h5>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<ul class="nav nav-pills nav-stacked">
+					<li>
+						<a href="/~imilos2/">Home</a>
+					</li>
+					<li>
+						<a href="/~imilos2/orbitSim">Space Elevator Operator</a>
+					</li>
+					<li class="active">
+						<a href="/~imilos2/MTGB">Magic Bracket</a>
+					</li>
+				</ul>
+			</div>
+			<div class="col-md-8" id="content">
+				<br />
+				<form class="form-inline" id="simpleForm">
+					<div class="row" id="row_basic">
+						<label class="col-sm-4 control-label">
+							Single card statistics
+						</label>
+						<div class="col-sm-4">
+							<div class="input-group">
+								<input type="text" placeholder="Choose your card" class="form-control" name="card-value" id='card-value' />
+								<div class="input-group-btn">
+									<button type="submit" value="Card statistics" class="btn btn-default" name="card-submit">
+										<i class="glyphicon glyphicon-search"></i>
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-4">
+							<a class="btn btn-primary" onclick="switchView(true)">Advanced Search</a>
+						</div>
+					</div>
+				</form>
+				<form class="form-inline">
+					<div class="row" id="row_adv" hidden>
+						<div class="col-sm-4">
+							<label class="control-label">Choose a filter</label>
+							<div class="dropdown">
+								<input type="hidden" value="" id="dropdown-hidden" name="filter-type" />
+								<button class="btn btn-default btn-block dropdown-toggle" id="filters" data-toggle="dropdown">
+									Filters
+									<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu" role="menu" aria-labelledby="filters">
+									<li role="presentation"><a role="menuitem" href="#" value="ART">Artist</a></li>
+									<li role="presentation"><a role="menuitem" href="#" value="CMC">Mana Cost</a></li>
+									<li role="presentation"><a role="menuitem" href="#" value="CLR">Colors</a></li>
+									<li role="presentation"><a role="menuitem" href="#" value="KWD">Keywords</a></li>
+									<li role="presentation"><a role="menuitem" href="#" value="RAR">Rarity</a></li>
+									<li role="presentation"><a role="menuitem" href="#" value="SET">Sets/Printings</a></li>
+									<li role="presentation"><a role="menuitem" href="#" value="TYP">Card Type</a></li>
+									<li role="presentation"><a role="menuitem" href="#" value="Batch">Batch (R.B)</a></li>
+								</ul>
+							</div>
+							<div class="input-group">
+								<input type="text" class="form-control" name="filter-value" id="filter-value"/>
+							</div>
+
+						</div>
+						<div class="col-sm-4">
+							<div class="checkbox">
+								<label><input type="checkbox" name="winners-only" />Show survivors only</label>
+							</div>
+							<button type="submit" value="Filter" class="btn btn-info btn-block" name="filter-submit">
+								<i class="glyphicon glyphicon-search"></i>
+							</button>
+						</div>
+						<div class="col-sm-4">
+							<a class="btn btn-primary" onclick="switchView(false)">Single Card Search</a>
+						</div>
+					</div>
+
+				</form>
+
+				<div class="panel-group" id="accordion-master" style="margin-bottom: 0;">
+					<div class="panel panel-default" style="display: none;" id="panel-template">
+						<div class="panel-heading">
+							<a data-toggle="collapse" href="#round_template" data-parent="#accordion-master">
+								Round Template
+							</a>
+						</div>
+						<div id="round_template" class="panel-collapse collapse">
+						
+							<div class="row m-0">
+								<div class="col-xs-4 col-sm-2">
+									<div class="cell">
+										<div class="cell-num">
+											
+										</div>
+										<div class="cell-text">
+											survived
+										</div>
+								</div>
+								</div>
+								<div class="col-xs-4 col-sm-2">
+									<div class="cell">
+										<div class="cell-num">
+											
+										</div>
+										<div class="cell-text">
+											defeated
+										</div>
+								</div>
+								</div>
+								<div class="col-xs-4 col-sm-2">
+									<div class="cell">
+										<div class="cell-num">
+											
+										</div>
+										<div class="cell-text">
+											Win rate %
+										</div>
+								</div>
+								</div>
+								<div class="col-xs-4 col-sm-2">
+									<div class="cell">
+										<div class="cell-num">
+											
+										</div>
+										<div class="cell-text">
+											Lowest vote %
+										</div>
+								</div>
+								</div>
+								<div class="col-xs-4 col-sm-2">
+									<div class="cell">
+										<div class="cell-num">
+											
+										</div>
+										<div class="cell-text">
+											Average vote %
+										</div>
+								</div>
+								</div>
+								<div class="col-xs-4 col-sm-2">
+									<div class="cell">
+										<div class="cell-num">
+											
+										</div>
+										<div class="cell-text">
+											Highest vote %
+										</div>
+								</div>
+								</div>
+							</div>
+								
+						</div>
+					</div>
+				</div>
+				<br />
+
+			</div>
+			<div class="col-md-2 text-center well lead">
+				Current Top 5:
+				<div id="top5" class="btn-group-vertical center-block"></div>
+				<br />
+				Last searches:
+				<div id="suggestions" class="btn-group-vertical center-block"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

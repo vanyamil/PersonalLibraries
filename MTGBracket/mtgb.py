@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import json
+from random import sample
 
 class Module:
 	"Implementations require `_description`, `_key`, `_type` fields"
@@ -153,7 +154,7 @@ class Artist(Module):
 class Filters:
 	@classmethod
 	def batch(_, round_, start, stop):
-		return lambda results, _: str(round_) in results and results[str(round_)]["Batch"] >= start and results[str(round_)]["Batch"] <= stop 
+		return lambda results, _: str(round_) in results and results[str(round_)]["Batch"] >= int(start) and results[str(round_)]["Batch"] <= int(stop) 
 
 	@classmethod
 	def round_(_, n):
@@ -161,7 +162,11 @@ class Filters:
 
 	@classmethod
 	def module(_, name, value):
-		return lambda _, modules: modules != None and name in modules.keys() and modules[name] == value
+		return lambda _, modules: (modules != None and name in modules.keys() and 
+			((type(modules[name]) is list and value in modules[name]) or 
+			(type(modules[name]) is int and int(value) == modules[name]) or 
+			(value == modules[name]))
+			)
 
 	@classmethod
 	def and_(_, list_):
@@ -186,7 +191,7 @@ class Summaries:
 
 	@classmethod
 	def full(_, name, results, modules):
-		return dict(zip(["Name", "Results", "Modules"], [name, results, modules]))
+		return dict(zip(["name", "results", "modules"], [name, results, modules]))
 
 class Reddit:
 	@classmethod
@@ -225,6 +230,12 @@ class Reddit:
 		bestVoted = ("[[%s]] vs [[%s]]" % (bestVoted[0], db[bestVoted[0]]["results"][str(round_)]["Opponent"]), bestVoted[1], bestVoted[2])
 		worstVoted = min([x for x in cards if x[1]>50], key=lambda x:x[1])
 		worstVoted = ("[[%s]] vs [[%s]]" % (worstVoted[0], db[worstVoted[0]]["results"][str(round_)]["Opponent"]), worstVoted[1], worstVoted[2])
+
+		bestRated = min(cards, key = lambda x: db[x[0]]["ranking"])
+		bestRated = [bestRated[0], db[bestRated[0]]["ranking"], db[bestRated[0]]["rating"]]
+		worstRated = max(cards, key = lambda x: db[x[0]]["ranking"])
+		worstRated = [worstRated[0], db[worstRated[0]]["ranking"], db[worstRated[0]]["rating"]]
+
 		tables = {}
 
 		for module in moduleList:
@@ -245,20 +256,32 @@ class Reddit:
 						table[card[2][module._key]] = [card[1] > 50, card[1] < 50, card[1]]
 			tables[module._description] = table
 
-		return (bestVoted, worstVoted, tables)
+		# Strength ratings
+		str_table = []
+		for card in cards:
+			dbf = db[card[0]]
+			str_table.append((card[0], dbf['rating'], dbf['ranking']))
+
+		str_table = sorted(str_table, key=lambda x: x[2])
+
+		return (bestVoted, worstVoted, tables, bestRated, worstRated, str_table)
 
 	@classmethod
 	def text(cls, type_, round_, batch_):
-		bestVoted, worstVoted, tables = cls.batch(round_, batch_) if type_ == "Batch" else cls.week(round_, batch_)
+		bestVoted, worstVoted, tables, bestRated, worstRated, str_table = cls.batch(round_, batch_) if type_ == "Batch" else (cls.week(round_, batch_) if type_ == "Week" else cls.main((round_, batch_[0], batch_[1]), [CMC(), Type(), Color(), Rarity(), Set(), Artist(), Keywords()]))
+		if type_ != "Week" and type_ != "Batch":
+			batch_ = 0
 		ret = """**Round %d, Batch %d - Daily Analysis** *by vanyamil*  
 
-**Delta** *is a measure of difference between the winning and the losing value.*  
+  
 
-Category|Side|Result|Value  
+Category|Side|Result|  
 :--|:--|:--|:--  
 Victory Margin|Highest|%s|%.2f%%  
  |Lowest|%s|%.2f%%  
-""" % (round_, batch_, bestVoted[0], bestVoted[1], worstVoted[0], worstVoted[1])
+Strength Rating|Best|%s|%d (%.2f)  
+ |Worst|%s|%d (%.2f)  
+""" % (round_, batch_, bestVoted[0], bestVoted[1], worstVoted[0], worstVoted[1], bestRated[0], bestRated[1], bestRated[2], worstRated[0], worstRated[1], worstRated[2])
 		
 		for module in tables:
 			recordList = sorted(tables[module], key=lambda x: tables[module][x][0] - tables[module][x][1], reverse=True)
@@ -277,29 +300,50 @@ Victory Margin|Highest|%s|%.2f%%
 			for key in recordList:
 				ret+="%s|%d-%d|%.2f  \n" % (key if type(key) is not int else str(key), tables[module][key][0], tables[module][key][1], tables[module][key][2] / (tables[module][key][0] + tables[module][key][1]))
 
+		ret += "\nCard|Rating|Ranking  \n:--|:--|:--  \n"
+		for rec in str_table:
+			ret += "%s|%.2f|%d  \n" % rec
+
 		return ret
 
 class Database:
 	import json
-	_RESULTS_PATH = "res/json/results.json"
-	_MODULES_PATH = "res/json/modules.json"
+	_RESULTS_PATH = "results.json"
+	_RATINGS_PATH = "ratings.json"
+	_MODULES_PATH = "modules.json"
 	_ALLCARDS_PATH = "res/json/AllCards-x.json"
 	_ALLSETS_PATH = "res/json/AllSets-x.json"
 	
 	def __init__(self, load_modules):
 		with open(Database._RESULTS_PATH) as f:
-			self.results = self.json.load(f, encoding="windows-1252")
+			self.results = self.json.loads(f.read().decode("windows-1252"))
+		with open(Database._RATINGS_PATH) as f:
+			self.ratings = self.json.loads(f.read().decode("windows-1252"))
+		self.rankings = sorted(self.ratings.keys(), key = lambda x : self.ratings[x], reverse=True)
 		if load_modules:
 			with open(Database._MODULES_PATH) as f:
-				self.modules = self.json.load(f, encoding="windows-1252")
+				self.modules = self.json.loads(f.read().decode("windows-1252"))
 				
 	def __getitem__(self, key):
 		ret = {}
 		ret["name"] = key
 		ret["results"] = self.results[key]
+		ret["rating"] = self.ratings[key]
+		ret["ranking"] = self.rankings.index(ret["name"]) + 1
 		if hasattr(self, "modules") and key in self.modules:
 			ret["modules"] = self.modules[key]
 		return ret
+
+	def rating(self, card, round_ = None):
+		rating = 100.0
+		round_ = int(round_)
+		if round_ is 0:
+			return rating
+		results = self.results[card]
+		for r in (sorted(results.keys(), key = int) if round_ is None else range(1, round_+1)):
+			opponent = results[str(r)]["Opponent"]
+			rating = (rating + self.rating(opponent, int(r) - 1)) * results[str(r)]["Percent"] / 100
+		return round(rating, 2)
 
 	def loadMTGJSON(self):
 		with open(Database._ALLCARDS_PATH) as f:
@@ -310,6 +354,8 @@ class Database:
 	def save(self):
 		with open(Database._RESULTS_PATH, "w") as f:
 			self.json.dump(self.results, f, encoding="windows-1252", indent=4)
+		with open(Database._RATINGS_PATH, "w") as f:
+			self.json.dump(self.ratings, f, encoding="windows-1252")
 		if hasattr(self, "modules"):
 			with open(Database._MODULES_PATH, "w") as f:
 				self.json.dump(self.modules, f, encoding="windows-1252", indent=4)
@@ -320,10 +366,14 @@ class Database:
 		loser_values = [batch_, winner, 100-percent]
 		if winner not in self.results:
 			self.results[winner] = {}
-		self.results[winner][round_] = dict(zip(result_keys, winner_values))
+		self.results[winner][str(round_)] = dict(zip(result_keys, winner_values))
 		if loser not in self.results:
 			self.results[loser] = {}
-		self.results[loser][round_] = dict(zip(result_keys, loser_values))
+		self.results[loser][str(round_)] = dict(zip(result_keys, loser_values))
+		# Update the card ratings
+		if(percent > 50):
+			self.ratings[winner] = self.rating(winner, round_)
+			self.ratings[loser] = self.rating(loser, round_)
 
 	def filter(self, l, return_ = Summaries.name):
 		if hasattr(self, "modules"):
@@ -343,22 +393,22 @@ class HTML:
 
 	@classmethod
 	def choices(_, l): 
-		return json.dumps({"error": "Did you mean one of these? \n - " + "\n - ".join(l)})
+		return json.dumps({"error": "Did you mean one of these? \n - " + "\n - ".join([("<a onclick='namedLoad(this.innerText)'>" + x + "</a>") for x in l])})
 
 if __name__ == "__main__":
 	import cgi
 	import cgitb; cgitb.enable()
 
-	db = Database(False)
+	db = Database(True)
 
 	form = cgi.FieldStorage()
-	if "card-value" in form:
-		print("Content-Type: application/json")
-		print("")
+	if "card-value" in form and form["card-value"].value != "":
+		print "Content-Type: application/json"
+		print ""
 		cardName = form["card-value"].value.decode('utf-8')
 
 		if cardName in db.results.keys():
-			print(HTML.cardView(db, cardName).encode("utf-8"))
+			print HTML.cardView(db, cardName).encode("utf-8")
 		else:
 			attempt = []
 			for x in db.results.keys():
@@ -368,26 +418,63 @@ if __name__ == "__main__":
 				elif cardName.lower() in x.lower():
 					attempt.append(x)
 			if len(attempt) == 1:
-				print(HTML.cardView(db, attempt[0]))
+				print HTML.cardView(db, attempt[0])
 			elif len(attempt) == 0:
-				print(HTML.noCardError)
+				print HTML.noCardError
 			else:
-				print(HTML.choices(attempt))
-	elif "filter-submit" in form:
-		print("Content-Type: application/json")
-		print("")
+				print HTML.choices(attempt)
+	elif "filter-value" in form:
+		print "Content-Type: application/json"
+		print ""
+
+		if form["filter-type"].value == "Batch":
+			arr = form["filter-value"].value.split(".")
+			results = db.filter(Filters.batch(arr[0], arr[1], arr[1]), Summaries.full)
+		else:
+			results = db.filter(Filters.module(form["filter-type"].value, form["filter-value"].value), Summaries.full)
+
+		per_round = dict()
+		survived = results
+		count = len(survived)
+		for r in range(1, 14):
+			if(count == 0):
+				break
+			min_vote, max_vote, sum_vote = 100, 0, 0
+			for x in survived:
+				if str(r) in x["results"]:
+					pt = x["results"][str(r)]["Percent"]
+					sum_vote += pt
+					min_vote = min(min_vote, pt)
+					max_vote = max(max_vote, pt)
+			avg_vote = sum_vote / float(count)
+			survived = [x for x in survived if str(r) in x["results"] and x["results"][str(r)]["Percent"] >= 50]
+			new_count = len(survived)
+			per_round[r] = [new_count, count - new_count, round(100*float(new_count)/count, 2), round(min_vote, 2), round(avg_vote, 2), round(max_vote, 2)]
+			count = new_count
+
+		if "winners-only" in form:
+			results = [x for x in results if min([v["Percent"] for (r, v) in x["results"].items()]) >= 50]
+		return_ = sample(results, 30) if len(results) > 30 else results
+
+		print json.dumps({"list": return_, "rounds": per_round})
 	elif "receive" in form:
-		print("Content-Type: text/plain")
-		print("")
+		print "Content-Type: text/plain"
+		print ""
 		Reddit.parseResults(int(form["round"].value), int(form["batch"].value), form["text"].value)
-		print(Reddit.text("Batch", int(form["round"].value), int(form["batch"].value)))
+		print Reddit.text("Batch", int(form["round"].value), int(form["batch"].value))
 	elif "results_batch" in form:
-		print("Content-Type: text/plain")
-		print("")
-		print(Reddit.text("Batch", int(form["round"].value), int(form["batch"].value)).encode('utf-8'))
+		print "Content-Type: text/plain"
+		print ""
+		print Reddit.text("Batch", int(form["round"].value), int(form["batch"].value)).encode('utf-8')
 	elif "results_week" in form:
-		print("Content-Type: text/plain")
-		print("")
-		print(Reddit.text("Week", int(form["round"].value), int(form["batch"].value)).encode('utf-8'))
+		print "Content-Type: text/plain"
+		print ""
+		print Reddit.text("Week", int(form["round"].value), int(form["batch"].value)).encode('utf-8')
+	elif "top5" in form:
+		print "Content-Type: application/json"
+		print ""
+		print json.dumps(db.rankings[0:5])
 	else:
-		print(HTML.noneGivenError)
+		print "Content-Type: application/json"
+		print ""
+		print HTML.noneGivenError
