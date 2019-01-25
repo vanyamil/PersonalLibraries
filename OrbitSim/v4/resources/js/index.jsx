@@ -110,7 +110,7 @@ let s = new p5(function(p5) {
 					pos,  ZERO_V, up
 				);
 
-				p5.perspective(p5.PI / 3, p5.width / p5.height, 3.5);
+				p5.perspective(p5.PI / 3, p5.width / p5.height, 5.5);
 			}
 		}
 	}

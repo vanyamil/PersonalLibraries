@@ -6,8 +6,8 @@ export default class ClimberPanel extends Component {
 
 		// Keep controlled input state
 		this.state = {
-			height: 40000,
-			tta: 2.00
+			height: 35000,
+			tta: 10.00
 		};
 
 		// Testing this method out?
