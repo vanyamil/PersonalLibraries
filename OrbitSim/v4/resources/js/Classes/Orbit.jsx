@@ -56,23 +56,26 @@ export default class Orbit {
         }
 
         this.flight_time = 0;
+
+        // Setup argument; gets recalculated from this position henceforth
+        this.last_true_anomaly = Math.PI;
     }
 
     update(timer) {
         // Orbits that left SOI no longer update, even if not hyperbolic (i.e. close to parabolic ellipticals)
-        if(this.left_earth)
+        if(this.left_earth || !timer.running)
             return;
 
         this.flight_time = timer.total - this.epoch.time;
 
         // Mean anomaly - "fraction" of orbit passed
-        let mean_anomaly = this.mean_at_epoch + this.flight_time * p5.prototype.TAU / this.period; // Tau / period is the mean motion
+        let mean_anomaly = (this.mean_at_epoch + this.flight_time * p5.prototype.TAU / this.period) % p5.prototype.TAU; // Tau / period is the mean motion
         // Eccentric anomaly - using Newton-Ralphson
         let true_anomaly;
         if(this.elliptical) {
             let fun_of_eccentric = E => E - this.e * Math.sin(E) - mean_anomaly;
             let derivative = E => 1 - this.e * Math.cos(E);
-            let ecc_anomaly = newton(fun_of_eccentric, derivative, Math.PI, Orbit.EPSILON);
+            let ecc_anomaly = newton(fun_of_eccentric, derivative, this.last_true_anomaly, Orbit.EPSILON);
             // True anomaly - angle between periapsis and current position as polar in f.o.r. of orbit
             true_anomaly = 2 * Math.atan2(
                 Math.sqrt(1 + this.e) * Math.sin(ecc_anomaly / 2),
@@ -82,13 +85,15 @@ export default class Orbit {
             // Similar to above, but with hyperbolic trig
             let fun_of_eccentric = E => this.e * Math.sinh(E) - E - mean_anomaly;
             let derivative = E => this.e * Math.cosh(E) - 1;
-            let ecc_anomaly = newton(fun_of_eccentric, derivative, Math.PI, Orbit.EPSILON);
+            let ecc_anomaly = newton(fun_of_eccentric, derivative, this.last_true_anomaly, Orbit.EPSILON);
             // True anomaly - angle between periapsis and current position as polar in f.o.r. of orbit
             true_anomaly = 2 * Math.atan2(
                 Math.sqrt(this.e + 1) * Math.sinh(ecc_anomaly / 2),
                 Math.sqrt(this.e - 1) * Math.cosh(ecc_anomaly / 2)
             );
         }
+        this.last_true_anomaly = true_anomaly;
+
         // Get the altitude from SLR and true
         let altitude = this.semi_latus / (1 + this.e * Math.cos(true_anomaly));
         // For now, draw in x direction on its own - need to rotate with eulers

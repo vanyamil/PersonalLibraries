@@ -25,7 +25,7 @@ let s = new p5(function(p5) {
 	p5.payloads = [];
 
 	p5.preload = function preload() {
-	    Earth.IMAGE = p5.loadImage("public/images/Albedo.jpg");
+	    Earth.IMAGE = p5.loadImage("public/images/Albedo.jpg"); /* Add public/ for prod */
 	}
 
 	p5.setup = function setup() {
@@ -58,11 +58,7 @@ let s = new p5(function(p5) {
 		p5.payloads.forEach(p => p.update(timer));
 	}
 
-	function handleCamera() {
-		// Track type
-		let idx = tracked !== null ? parseInt(tracked.substr(1)) : null;
-		let climbing_track = tracked !== null && (tracked[0] == 'c' || (tracked[0] == 'p' && p5.payloads[idx].contained))
-
+	function handleCamera(idx, climbing_track) {
 		if(tracked === null) {
 			p5.camera(
 				0, 0, (p5.height/2.0) / p5.tan(p5.PI*30.0 / 180.0),
@@ -75,7 +71,7 @@ let s = new p5(function(p5) {
 		else {
 			if(climbing_track) { // Climber or payload in climber
 				let pos = (tracked[0] == 'c' ? p5.climbers[idx] : p5.payloads[idx]).true_position.copy(); 
-				pos.mult(sizeScale);
+				pos.addMag(Payload.SIZE).mult(sizeScale);
 				pos.y *= -1;
 
 				let up = p5.createVector(0, 0, -1);
@@ -84,7 +80,7 @@ let s = new p5(function(p5) {
 					pos, ZERO_V, up
 				);
 
-				p5.perspective(p5.PI / 3, p5.width / p5.height, pos.mag() / 8);
+				p5.perspective(p5.PI / 3, p5.width / p5.height, Payload.SIZE * sizeScale); // Near plane starts at true location
 			} else if(p5.payloads[idx].impacted) { // On ground
 				let pos = p5.payloads[idx].true_position.copy().addMag(Earth.RADIUS *0.5); 
 				pos.mult(sizeScale);
@@ -116,8 +112,29 @@ let s = new p5(function(p5) {
 	}
 
 	p5.draw = function draw() {
+		// What is being tracked
+		let idx = tracked !== null ? parseInt(tracked.substr(1)) : null;
+		// Is the tracked object currently climbing
+		let climbing_track = tracked !== null && (tracked[0] == 'c' || (tracked[0] == 'p' && p5.payloads[idx].contained))
+		// What is the ID of the payload that is tracked during climbing?
+		let climbing_pid = climbing_track 
+			? (tracked[0] == 'p' 
+				? idx // We're tracking that payload
+				: // Need to find ID of payload that is inside this climber
+				p5.payloads.indexOf(p5.climbers[idx].payload)
+			) 
+			: null;
+		// What is the ID of the climber that is tracked during climbing?
+		let climbing_cid = climbing_track 
+			? (tracked[0] == 'c' 
+				? idx // We're tracking that climber
+				: // Need to find ID of climber that has this payload
+				p5.climbers.indexOf(p5.payloads[idx].container)
+			) 
+			: null;
+
 		update();
-		handleCamera();
+		handleCamera(idx, climbing_track);
 
 		// Draw the UI
 		reactTop.forceUpdate();
@@ -128,9 +145,9 @@ let s = new p5(function(p5) {
 	    // Set up the default transformation : rotation due to earth and scale
 	    p5.scale(sizeScale, -sizeScale, sizeScale);  // -y so that +y points up
 	    Earth.draw(p5);
-	    Ribbon.draw(p5);
-	    p5.climbers.forEach(c => c.draw(p5));
-	    p5.payloads.forEach(p => p.draw(p5));
+	    Ribbon.draw(p5, tracked !== null);
+	    p5.climbers.forEach((c, index) => index !== climbing_cid && c.draw(p5));
+	    p5.payloads.forEach((p, index) => index !== climbing_pid && p.draw(p5));
 	};
 
 	p5.windowResized = function windowResized() {
