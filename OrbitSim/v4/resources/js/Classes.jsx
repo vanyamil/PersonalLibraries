@@ -28,16 +28,18 @@ Earth.draw = function(p5) {
     p5.pop();
 };
 
-Ribbon.draw = function(p5) {
+Ribbon.draw = function(p5, should_shorten) {
     p5.push();
     p5.rotateZ(Earth.rotation);
     p5.rotateZ(Ribbon.LONGITUDE);
     p5.rotateX(Ribbon.LATITUDE);
 
+    let w = should_shorten ? Ribbon.WIDTH / 10 : Ribbon.WIDTH;
+
     p5.draw_wrapper(
         p5.createVector(0, Ribbon.LENGTH / 2 + Earth.RADIUS, 0), // Center of ribbon box
         Ribbon.COLOR,
-        () => p5.box(Ribbon.WIDTH, Ribbon.LENGTH, Ribbon.WIDTH)
+        () => p5.box(w, Ribbon.LENGTH, w)
     );
     
     p5.draw_wrapper(

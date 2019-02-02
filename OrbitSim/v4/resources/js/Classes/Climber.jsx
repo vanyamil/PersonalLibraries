@@ -9,7 +9,7 @@ export default class Climber {
     // Constants
     static get ACTIVE_COLOR() { return [255, 0, 0, 200]; }        // Color of the selected climber
     static get INACTIVE_COLOR() { return [128, 128, 128, 100]; }  // Color of any unselected climbers
-    static get SIZE() { return 3000000; }                         // Size of the visible box of the climbers, units : m, not real value
+    static get SIZE() { return 2000000; }                         // Size of the visible box of the climbers, units : m, not real value
     
     // Constructor
     constructor(height) {

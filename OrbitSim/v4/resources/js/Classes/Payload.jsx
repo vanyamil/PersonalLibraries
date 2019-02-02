@@ -5,7 +5,7 @@ export default class Payload {
     static get ACTIVE_COLOR() { return 'yellow'; }
     static get INACTIVE_COLOR() { return 'cyan'; }
     static get IMPACT_COLOR() { return '#ff8d00'; }
-    static get SIZE() { return 1000000; }                // Size of the payload sphere, units : m, not real value
+    static get SIZE() { return 700000; }                // Size of the payload sphere, units : m, not real value
     
     // Constructor
     constructor(climber) {
