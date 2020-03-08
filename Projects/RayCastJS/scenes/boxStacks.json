@@ -1,0 +1,160 @@
+{
+  "samples": 4,
+  "camera": {
+    "pos":    [6, 10, 15], 
+    "lookAt": [0, 0, 0],
+    "up":     [0, 1, 0],
+    "fovy":   45,
+    "screen": {
+      "w": 512,
+      "h": 512
+    }
+  },
+  "lights": [
+    {
+      "pos":   [-5, 5, 5],
+      "color": 128
+    },
+    {
+      "pos":   [5, 10, 5],
+      "color": 230
+    }
+  ],
+  "materials": [
+    {
+      "name": "red",
+      "diffuse": [255, 0, 0],
+      "specExp": 32,
+      "specular": [204, 204, 204]
+    },
+    {
+      "name": "green",
+      "diffuse": [0, 255, 0],
+      "specExp": 32,
+      "specular": [204, 204, 204]
+    },
+    {
+      "name": "blue",
+      "diffuse": [0, 0, 255],
+      "specExp": 32,
+      "specular": [204, 204, 230]
+    },
+    {
+      "name": "orange",
+      "diffuse": [255, 128, 0],
+      "specExp": 32,
+      "specular": [204, 204, 230]
+    },
+    {
+      "name": "yellow",
+      "diffuse": [255, 255, 0],
+      "specExp": 32,
+      "specular": [204, 204, 230]
+    }
+  ],
+  "root": {
+    "type": "node",
+    "children": [
+      {
+        "type": "plane",
+        "material": "blue",
+        "mat2": "green"
+      },
+      {
+        "type": "transform",
+        "rotate": [0, 30, 0],
+        "child": {
+          "type": "node",
+          "name": "boxStack",
+          "bounds": {
+            "type": "sphere",
+            "pos": [0, 1.5, 0],
+            "radius": 2.1
+          },
+          "children": [
+            {
+              "type": "box",
+              "min": [-1, 0, -1],
+              "max": [1, 2, 1],
+              "pos": [0, 1, 0],
+              "material": "red"
+            },
+            {
+              "type": "transform",
+              "rotate": [0, 12, 0],
+              "translate": [0, 2, 0],
+              "scale": 0.5,
+              "child": {
+                "type": "node",
+                "children": [
+                  {
+                    "type": "box",
+                    "min": [-1, 0, -1],
+                    "max": [1, 2, 1],
+                    "pos": [0, 1, 0],
+                    "material": "orange"
+                  },
+                  {
+                    "type": "transform",
+                    "translate": [0, 2, 0.2],
+                    "rotate": [0, -15, 0],
+                    "scale": 0.5,
+                    "child": {
+                      "type": "box",
+                      "min": [-1, 0, -1],
+                      "max": [1, 2, 1],
+                      "pos": [0, 1, 0],
+                      "material": "yellow"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type":      "transform",
+        "rotate":    [0, 24, 0],
+        "translate": [3, 0, -3],
+        "child":     "boxStack"
+      },
+      {
+        "type":      "transform",
+        "rotate":    [0, 87, 0],
+        "translate": [3, 0, 3],
+        "child":     "boxStack"
+      },
+      {
+        "type":      "transform",
+        "rotate":    [0, 4, 0],
+        "translate": [-3, 0, -3],
+        "child":     "boxStack"
+      },
+      {
+        "type":      "transform",
+        "rotate":    [0, 57, 0],
+        "translate": [-3, 0, 3],
+        "child":     "boxStack"
+      },
+      {
+        "type":      "transform",
+        "rotate":    [0, 34, 0],
+        "translate": [-6, 0, 0],
+        "child":     "boxStack"
+      },
+      {
+        "type":      "transform",
+        "rotate":    [0, 47, 0],
+        "translate": [-3, 0, -9],
+        "child":     "boxStack"
+      },
+      {
+        "type":      "transform",
+        "rotate":    [0, 23, 0],
+        "translate": [0, 0, -6],
+        "child":     "boxStack"
+      }
+    ]
+  }
+}

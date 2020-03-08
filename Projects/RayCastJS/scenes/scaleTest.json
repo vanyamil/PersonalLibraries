@@ -1,0 +1,58 @@
+{
+    "ambient": 25,
+    "bg": [200, 200, 255],
+    "samples": 4,
+    "reflDepth": 3,
+    "camera": {
+        "pos":    [0, 2, -7], 
+        "lookAt": [0, 2, 0],
+        "up":     [0, 1, 0],
+        "fovy":   45,
+        "screen": {
+            "w": 800,
+            "h": 450
+        }
+    },
+    "lights": [
+        {
+            "pos":   [-5, 8, -3],
+            "color": 255
+        }
+    ],
+    "materials": [
+        {
+            "name": "green",
+            "diffuse": [0, 255, 0],
+            "specExp": 32
+        },
+        {
+            "name": "blue",
+            "diffuse": [0, 0, 255],
+            "specExp": 32
+        }
+    ],
+    "root": {
+        "type": "node",
+        "children": [
+            {
+                "name":   "blueSphere",
+                "type":   "sphere",
+                "pos":    [0, 0, 0],
+                "radius": 0.36,
+                "material": "blue"
+            },
+            {
+                "name": "greenT",
+                "type": "transform",
+                "child": {
+                    "name":   "greenSphere",
+                    "type":   "sphere",
+                    "pos":    [0, 0, 0],
+                    "radius": 0.75,
+                    "material": "green"
+                },
+                "scale": 0.5
+            }
+        ]
+    }
+}

@@ -1,0 +1,246 @@
+{
+  "ambient": 10,
+  "samples": 4,
+  "reflDepth": 5,
+  "camera": {
+    "pos":    [0, 1, 10], 
+    "lookAt": [0, 1, 0],
+    "up":     [0, 1, 0],
+    "fovy":   45,
+    "screen": {
+      "w": 1280,
+      "h": 720
+    },
+    "dof": {
+      "samples": 4,
+      "aperture": 0.005,
+      "focus": [0, 0, 8],
+      "fNormal": [0, 4, -1]
+    }
+  },
+  "lights": [
+    {
+      "color": 51,
+      "pos":   [0, 1, 7]
+    },
+    {
+      "color": 100,
+      "pos":   [0, 2.15, 1]
+    },
+    {
+      "color": 100,
+      "pos":   [0, 2.15, 3]
+    },
+    {
+      "color": 100,
+      "pos":   [0, 2.15, 5]
+    },
+    {
+      "color": 20,
+      "pos":   [-0.35, 2.5, 1]
+    },
+    {
+      "color": 20,
+      "pos":   [-0.35, 2.5, 3]
+    },
+    {
+      "color": 20,
+      "pos":   [-0.35, 2.5, 5]
+    },
+    {
+      "color": 20,
+      "pos":   [0.35, 2.5, 1]
+    },
+    {
+      "color": 20,
+      "pos":   [0.35, 2.5, 3]
+    },
+    {
+      "color": 20,
+      "pos":   [0.35, 2.5, 5]
+    }
+  ],
+  "materials": [
+    {
+      "name":    "gold",
+      "diffuse": [230, 230, 25],
+      "reflect": 51
+    },
+    {
+      "name":    "mirror",
+      "reflect": true
+    },
+    {
+      "name":    "silver",
+      "diffuse": 204,
+      "specExp": 100
+    },
+    {
+      "name":    "reflSilver",
+      "diffuse": 153,
+      "reflect": 102
+    },
+    {
+      "name":    "tron",
+      "diffuse": [51, 204, 230],
+      "specExp": 4,
+      "specular": 25
+    },
+    {
+      "name":    "tronR",
+      "diffuse": [37, 153, 165],
+      "reflect": 76
+    }
+  ],
+  "root": {
+    "type": "node",
+    "children": [
+      {
+        "type": "plane",
+        "material": "tron"
+      },
+      {
+        "type": "box",
+        "min": [-4, 0, -2.5],
+        "max": [4, 0.1, -1.5],
+        "material": "silver"
+      },
+      {
+        "type": "transform",
+        "name": "rightPlane",
+        "rotate": [0, 0, -110],
+        "translate": [-2, 0, 0],
+        "child": {
+          "type": "node",
+          "children": [
+            {
+              "type": "plane",
+              "material": "tronR"
+            },
+            {
+              "type": "box",
+              "min": [-6, 0, -2.5],
+              "max": [2, 0.1, -1.5],
+              "material": "silver"
+            }
+          ]
+        }
+      },
+      {
+        "type": "transform",
+        "name": "leftPlane",
+        "rotate": [0, 0, 110],
+        "translate": [2, 0, 0],
+        "child": {
+          "type": "node",
+          "children": [
+            {
+              "type": "plane",
+              "material": "tronR"
+            },
+            {
+              "type": "box",
+              "min": [-2, 0, -2.5],
+              "max": [6, 0.1, -1.5],
+              "material": "silver"
+            }
+          ]
+        }
+      },
+      {
+        "type": "node",
+        "bounds": {
+          "type": "box",
+          "min": [-1.15, 0, 0],
+          "max": [1.15, 0.01, 12]
+        },
+        "children": [
+          {
+            "type": "box",
+            "name": "longBox",
+            "material": "gold",
+            "min": [-0.2, 0, 1],
+            "max": [0.2, 0.01, 9]
+          },
+          {
+            "type": "transform",
+            "translate": [-0.45, 0, 2],
+            "child": "longBox"
+          },
+          {
+            "type": "transform",
+            "translate": [-0.95, 0, 0.5],
+            "child": "longBox"
+          },
+          {
+            "type": "transform",
+            "translate": [0.45, 0, 3],
+            "child": "longBox"
+          },
+          {
+            "type": "transform",
+            "translate": [0.95, 0, -1],
+            "child": "longBox"
+          }
+        ]
+      },
+      {
+        "name": "lamps",
+        "type": "node",
+        "bounds": {
+          "type": "box",
+          "min": [-0.3, 2.2, 0.7],
+          "max": [0.3, 7, 5.3]
+        },
+        "children": [
+          {
+            "type": "node",
+            "name": "lamp",
+            "children": [
+              {
+                "type": "sphere",
+                "pos": [0, 2.5, 3],
+                "radius": 0.3,
+                "material": "reflSilver"
+              },
+              {
+                "type": "box",
+                "min": [-0.01, 2.5, 2.99],
+                "max": [0.01, 7, 3.01],
+                "material": "silver"
+              }
+            ]
+          },
+          {
+            "type": "transform",
+            "translate": [0, 0, -2],
+            "child": "lamp"
+          },
+          {
+            "type": "transform",
+            "translate": [0, 0, 2],
+            "child": "lamp"
+          }
+        ]
+      },
+      {
+        "name": "backMirror",
+        "type": "transform",
+        "translate": [0, 0, -4],
+        "rotate": [90, 0, 0],
+        "child": {
+          "name": "mirrorPlane",
+          "type": "plane",
+          "material": "mirror"
+        }
+      },
+      {
+        "name": "frontMirror",
+        "type": "transform",
+        "translate": [0, 0, 14],
+        "rotate": [90, 0, 0],
+        "child": "mirrorPlane"
+      }
+    ]
+  }
+}

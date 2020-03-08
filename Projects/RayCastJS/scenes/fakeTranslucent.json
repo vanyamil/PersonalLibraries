@@ -1,0 +1,85 @@
+{
+    "ambient": 25,
+    "bg": [200, 200, 255],
+    "samples": 4,
+    "reflDepth": 3,
+    "camera": {
+        "pos":    [0, 3, -7],
+        "lookAt": [0, 2, 0],
+        "up":     [0, 1, 0],
+        "fovy":   45,
+        "screen": {
+            "w": 800,
+            "h": 450
+        }
+    },
+    "lights": [
+        {
+            "pos":   [-5, 8, -3],
+            "color": 255
+        }
+    ],
+    "materials": [
+        {
+            "name": "purpleGloss",
+            "diffuse": [200, 20, 255],
+            "specExp": 8,
+            "specular": 150,
+            "reflect": 50
+        },
+        {
+            "name": "wateryBlue",
+            "diffuse": [100, 200, 200],
+            "reflect": 50
+        },
+        {
+            "name": "green",
+            "diffuse": [0, 255, 0],
+            "specExp": 32
+        }
+    ],
+    "root": {
+        "type": "node",
+        "children": [
+            {
+                "type":   "sphere",
+                "pos":    [3, 3, 10],
+                "radius": 3,
+                "material": "purpleGloss"
+            },
+            {
+                "name":   "greenSphere",
+                "type":   "sphere",
+                "pos":    [-1, 4, 4],
+                "radius": 0.75,
+                "material": "green"
+            },
+            {
+                "type": "plane",
+                "material": {
+                    "diffuse": 100
+                },
+                "mat2": {
+                    "diffuse": [255, 255, 100]
+                }
+            },
+            {
+                "type": "transform",
+                "child": {
+                    "type": "box",
+                    "material": "wateryBlue",
+                    "min": [-0.5, -0.5, -0.5],
+                    "max": [0.5, 0.5, 0.5]
+                },
+                "translate": [2, 1, 4.5],
+                "rotate": [0, 0, 30],
+                "scale": [2, 0.5, 1]
+            },
+            {
+                "type": "transform",
+                "translate": [-3, -2, 0],
+                "child": "greenSphere"
+            }
+        ]
+    }
+}
