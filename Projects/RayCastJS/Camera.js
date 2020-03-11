@@ -1,8 +1,8 @@
 class Camera {
     constructor(pos, lookAt, up) {
-        this.pos = createVector();
-        this.dir = createVector();
-        this.lookAt = createVector();
+        this.pos = new Vector3();
+        this.dir = new Vector3();
+        this.lookAt = new Vector3();
         this.set(pos, lookAt, up);
         
         this.dof = {};
@@ -10,18 +10,15 @@ class Camera {
     }
     
     set(pos, lookAt, up) {
-        this.lookAt.set(lookAt);
+        this.lookAt.set(...lookAt);
         // Camera location
-        this.pos.set(pos);
+        this.pos.set(...pos);
         // Viewing direction
-        this.dir.set(p5.Vector.sub(lookAt, pos));
-        this.dir.normalize();
+        this.dir.set(this.lookAt).sub(this.pos).normalize();
         // The "right" vector - the X coordinate of the screen will be along it
-        this.right = p5.Vector.cross(up, this.dir);
-        this.right.normalize();
+        this.right = new Vector3(up).cross(this.dir).normalize();
         // The "up" vector - the Y coordinate of the screen will be along it
-        this.up = p5.Vector.cross(this.dir, this.right);
-        this.up.normalize(); // Should already be normalized, but doing for rounding errors
+        this.up = this.dir.cross(this.right).normalize(); // Should already be normalized, but doing for rounding errors
     }
     
     setScreen(width, height, fovy) {
@@ -35,8 +32,7 @@ class Camera {
         this.fovy = fovy;
         let tanned = Math.tan(fovy * Math.PI/360); // Angle given in degrees; switch to radians and divide by 2
         // Vector from camera position to center of screen
-        this.vToScreen = this.dir.copy();
-        this.vToScreen.setMag(this.height2 / tanned);
+        this.vToScreen = this.dir.copy().setMag(this.height2 / tanned);
     }
     
     /*
@@ -65,17 +61,17 @@ class Camera {
     
     setDOF(point, normal, aperture, samples) {
         if(point) {
-        	this.dof.p = point;
+        	this.dof.p = new Vector3(point);
         }
         if(normal) {
-        	this.dof.n = normal;
+        	this.dof.n = new Vector3(normal);
         }
         this.dof.a = aperture;
         this.dof.samples = samples;
     }
     
     generateRay(x, y, outR) {
-        if(!(outR instanceof Ray) || x < 0 || y < 0 || x > this.width || y > this.height) {
+        if(x < 0 || y < 0 || x > this.width || y > this.height) { // Removed testing || !(outR instanceof Ray)
             return false;
         }
         
@@ -85,8 +81,8 @@ class Camera {
         
         // Direction composed of vector to screen + vector along screen's X and Y
         let dir = this.vToScreen.copy();
-        dir.add(p5.Vector.mult(this.right, x));
-        dir.add(p5.Vector.mult(this.up, y));
+        dir.add(Vector3.mult(this.right, x));
+        dir.add(Vector3.mult(this.up, y));
         // Ray origin is camera position
         outR.set(this.pos, dir);
         outR.resetBounds();

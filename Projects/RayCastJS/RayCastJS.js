@@ -3,7 +3,7 @@ var scene = null;
 var startTime;
 
 function preload() {
-    json = loadJSON("scenes/boxStacks.json");
+    json = loadJSON("scenes/fakeTranslucent.json");
 }
 
 function setup() {
@@ -14,6 +14,9 @@ function setup() {
     startTime = millis();
     createCanvas(scene.cam.width, scene.cam.height);
     frameRate(30);
+        
+        // Load the pixels into the back buffer
+        loadPixels();
 }
 
 function draw() {

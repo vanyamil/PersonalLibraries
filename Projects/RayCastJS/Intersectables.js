@@ -1,17 +1,16 @@
 class IntersectionResult {
     constructor() {
         this.material = null;
-        this.p = createVector();
-        this.n = createVector();
+        this.p = new Vector3(0, 0, 0, true);
+        this.n = new Vector3(1, 0, 0, true);
         this.reset();
     }
     
     setIntersection(t, p, n, m) {
         this.connects = true;
         this.t = t;
-        this.p.set(p);
-        this.n.set(n);
-        this.n.normalize();
+        this.p.setV(p);
+        this.n.setV(n).normalize();
         this.material = m;
     }
     
@@ -82,13 +81,13 @@ class MatrixTransform extends Intersectable {
         this.child = child;
         this.setMatrix(t, r, s);
         // MULTITHREADING WARNING
-        this.localRay = new Ray([0,0,0], [0,0,0]);
+        this.localRay = new Ray();
     }
     
     setMatrix(t, r, s) {
         this.m = new Matrix4();
         // Order of operations : S * Rz * Ry * Rx * T * v?
-        this.m.scale(s).rotate(r).translate(t);
+        this.m.scale(s).rotate(new Vector3(...r)).translate(t);
         // Saving two other matrices too : inverse, and inv transpose
         this.mInv = this.m.copy().inverse();
         this.mIt = this.mInv.copy().transpose();
@@ -102,7 +101,9 @@ class MatrixTransform extends Intersectable {
         this.mInv.transV(this.localRay.dir);
         // If the matrix scales direction, need to modify bounds and t values!
         let scale = this.localRay.dir.mag();
-        this.localRay.min *= scale;
+        if(this.localRay.min != 1e-5) {
+        	this.localRay.min *= scale;
+        }
         this.localRay.max *= scale;
         // Note the division here to make next two operations multiplications
         scale = 1/scale;
@@ -119,13 +120,12 @@ class MatrixTransform extends Intersectable {
         outIR.t *= scale;
         return true;
     }
-    
 }
 
 class Sphere extends Intersectable {
     constructor(pos, rad) {
         super();
-        this.c = pos;
+        this.c = new Vector3(...pos);
         this.r = rad;
     }
     
@@ -148,13 +148,13 @@ class Sphere extends Intersectable {
         // Check lower value against ray bounds
         let t = -dp - sqrtDet;
         if(ray.at(t, outIR.p)) {
-            outIR.setIntersection(t, outIR.p, p5.Vector.sub(outIR.p, this.c), this.material);
+            outIR.setIntersection(t, outIR.p, Vector3.sub(outIR.p, this.c), this.material);
             return true;
         }
         // Check upper value against ray bounds
         t += 2 * sqrtDet;
         if(ray.at(t, outIR.p)) {
-            outIR.setIntersection(t, outIR.p, p5.Vector.sub(outIR.p, this.c), this.material);
+            outIR.setIntersection(t, outIR.p, Vector3.sub(outIR.p, this.c), this.material);
             return true;
         }
         
@@ -182,7 +182,7 @@ class Plane extends Intersectable {
         if(ray.at(t, outIR.p)) {
             let b = floor(outIR.p.x) + floor(outIR.p.z);
             let m = this.mat2 == null || ((b % 2) + 2) % 2 < 1 ? this.material : this.mat2;
-            let n = ray.src.y > 0 ? createVector(0, 1, 0) : createVector(0, -1, 0);
+            let n = ray.src.y > 0 ? new Vector3(0, 1, 0) : new Vector3(0, -1, 0);
             outIR.setIntersection(t, outIR.p, n, m);
             return true;
         }
@@ -193,128 +193,64 @@ class Plane extends Intersectable {
 class Box extends Intersectable {
     constructor(min, max) {
         super();
-        this.min = min;
-        this.max = max;
+        this.min = new Vector3(...min);
+        this.max = new Vector3(...max);
     }
     
     intersects(ray, outIR) {
         const interval = [ray.min, ray.max];
         const normals = [null, null];
         // For each of the 3 slabs - if putting in a loop, need to use reduce so that the interval test can follow each coord
-        
-        // Comments given as if for X - equivalent for other dims
-        let d = ray.dir.x;
-        let s = ray.src.x;
-        if(d == 0) { // in the YZ plane
-            if(s <= this.min.x || s >= this.max.x) { // Out of X-slab
-                return false;
-            } // Else, fully in x-slab, keep interval as is
-        } else {
-            const n = createVector();
-            n.x = 1;
-            d = 1 / d;
-            const tMin = (this.min.x - s) * d;
-            const tMax = (this.max.x - s) * d;
-            let tLow, tHigh;
-            if(tMin < tMax) {
-                tLow = tMin;
-                tHigh = tMax;
-                n.x *= -1;
+        for(let i = 0; i < 3; i++) {
+        	// Comments given as if for X - equivalent for other dims
+            const coord = Box.coords[i];
+            let d = ray.dir[coord];
+            const s = ray.src[coord];
+            
+            if(d == 0) { // in the YZ plane
+                if(s <= this.min[coord] || s >= this.max[coord]) { // Out of X-slab
+                    return false;
+                } // Else, fully in x-slab, keep interval as is
             } else {
-                tLow = tMax;
-                tHigh = tMin;
+                // Low normal
+                const n = new Vector3();
+                n[coord] = 1;
+                // GOnna divide by d, so do so only once
+                d = 1 / d;
+                const tMin = (this.min[coord] - s) * d;
+                const tMax = (this.max[coord] - s) * d;
+                // Which t is smaller
+                let tLow, tHigh;
+                if(tMin < tMax) {
+                    tLow = tMin;
+                    tHigh = tMax;
+                    n[coord] *= -1;
+                } else {
+                    tLow = tMax;
+                    tHigh = tMin;
+                }
+                // Update interval and normals
+                if(interval[0] < tLow) {
+                    interval[0] = tLow;
+                    normals[0] = n;
+                }
+                if(interval[1] > tHigh) {
+                    interval[1] = tHigh;
+                    normals[1] = n.copy().mult(-1);
+                }
             }
-            // Update interval and normals
-            if(interval[0] < tLow) {
-                interval[0] = tLow;
-                normals[0] = n;
-            }
-            if(interval[1] > tHigh) {
-                interval[1] = tHigh;
-                normals[1] = n.copy().mult(-1);
-            }
-        }
-        // Have we gone inside out
-        if(interval[0] >= interval[1]) {
-            return false;
-        }
-        d = ray.dir.y;
-        s = ray.src.y;
-        if(d == 0) { // in the YZ plane
-            if(s <= this.min.y || s >= this.max.y) { // Out of X-slab
+            // Have we gone inside out
+            if(interval[0] >= interval[1]) {
                 return false;
-            } // Else, fully in x-slab, keep interval as is
-        } else {
-            const n = createVector();
-            n.y = 1;
-            d = 1 / d;
-            const tMin = (this.min.y - s) * d;
-            const tMax = (this.max.y - s) * d;
-            let tLow, tHigh;
-            if(tMin < tMax) {
-                tLow = tMin;
-                tHigh = tMax;
-                n.y *= -1;
-            } else {
-                tLow = tMax;
-                tHigh = tMin;
             }
-            // Update interval and normals
-            if(interval[0] < tLow) {
-                interval[0] = tLow;
-                normals[0] = n;
-            }
-            if(interval[1] > tHigh) {
-                interval[1] = tHigh;
-                normals[1] = n.copy().mult(-1);
-            }
-        }
-        // Have we gone inside out
-        if(interval[0] >= interval[1]) {
-            return false;
-        }
-        d = ray.dir.z;
-        s = ray.src.z;
-        if(d == 0) { // in the YZ plane
-            if(s <= this.min.z || s >= this.max.z) { // Out of X-slab
-                return false;
-            } // Else, fully in x-slab, keep interval as is
-        } else {
-            const n = createVector();
-            n.z = 1;
-            d = 1 / d;
-            const tMin = (this.min.z - s) * d;
-            const tMax = (this.max.z - s) * d;
-            let tLow, tHigh;
-            if(tMin < tMax) {
-                tLow = tMin;
-                tHigh = tMax;
-                n.z *= -1;
-            } else {
-                tLow = tMax;
-                tHigh = tMin;
-            }
-            // Update interval and normals
-            if(interval[0] < tLow) {
-                interval[0] = tLow;
-                normals[0] = n;
-            }
-            if(interval[1] > tHigh) {
-                interval[1] = tHigh;
-                normals[1] = n.copy().mult(-1);
-            }
-        }
-        // Have we gone inside out
-        if(interval[0] >= interval[1]) {
-            return false;
         }
         
         // Setup the ray
-        if(ray.at(interval[0], outIR.p)) {
+        if(interval[0] > ray.min && ray.at(interval[0], outIR.p)) {
             outIR.setIntersection(interval[0], outIR.p, normals[0], this.material);
             return true;
         }
-        if(ray.at(interval[1], outIR.p)) {
+        if(interval[1] < ray.max && ray.at(interval[1], outIR.p)) {
             outIR.setIntersection(interval[1], outIR.p, normals[1], this.material);
             return true;
         }
@@ -322,3 +258,5 @@ class Box extends Intersectable {
         return false;
     }
 }
+
+Box.coords = ["x", "y", "z"];

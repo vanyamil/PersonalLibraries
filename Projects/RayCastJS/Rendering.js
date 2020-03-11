@@ -1,68 +1,41 @@
-class MyColor {
-    constructor(c) {
-        this.col = createVector(0, 0, 0);
-        if(typeof c !== "undefined" && c instanceof p5.Color) {
-        	this.col.set(c._array);
+class MyColor extends Vector3 {
+    constructor(arr) {
+        super();
+        if(arr instanceof Array) {
+            this.setRGB255(...arr);
+        } else {
+            this.setRGB255(arr, arr, arr);
         }
     }
     
     setRGB255(r, g, b) {
-        this.setRGB(r/255.0, g/255.0, b/255.0);
+        return this.setRGB(r/255.0, g/255.0, b/255.0);
     }
     
     setRGB(r, g, b) {
-        this.col.set(r, g, b);
-    }
-    
-    copy() {
-        let outp = new MyColor();
-        outp.setRGB(this.col.x, this.col.y, this.col.z);
-        return outp;
-    }
-    
-    multWise(other) {
-        this.col.x *= other.col.x;
-        this.col.y *= other.col.y;
-        this.col.z *= other.col.z;
-        return this;
-    }
-    
-    mult(v) { 
-        this.col.x *= v;
-        this.col.y *= v;
-        this.col.z *= v;
-        return this;
-    }
-    
-    add(other) {
-        this.col.x += other.col.x;
-        this.col.y += other.col.y;
-        this.col.z += other.col.z;
-        return this;
+        return this.set(r, g, b, false);
     }
     
     limit() {
-        if(this.col.x > 1) {
-            this.col.x = 1;
+        if(this.x > 1) {
+            this.x = 1;
         }
-        if(this.col.y > 1) {
-            this.col.y = 1;
+        if(this.y > 1) {
+            this.y = 1;
         }
-        if(this.col.z > 1) {
-            this.col.z = 1;
+        if(this.z > 1) {
+            this.z = 1;
         }
     }
     
     getFinal() {
         this.limit();
-        const localC = this.col.copy();
-        localC.mult(255);
-        return color(localC.array());
+        return [this.x * 255, this.y * 255, this.z * 255];
     }
 }
 
 class Material {
-    constructor(c = color(0)) {
+    constructor(c) {
         this.setDiffuse(c);
         this.specularEnabled = false;
         this.reflectEnabled = false;
@@ -73,13 +46,13 @@ class Material {
         this.diffuse = new MyColor(c);
     }
     
-    setSpecular(exp, c = color(255)) {
+    setSpecular(exp, c = 255) {
         this.specularEnabled = true;
         this.specular = new MyColor(c);
         this.specExp = exp;
     }
     
-    setReflect(c = color(255)) { 
+    setReflect(c = 255) { 
         this.reflectEnabled = true;
         this.reflect = new MyColor(c);
     }
@@ -93,7 +66,7 @@ class Material {
 
 class PointLight {
     constructor(pos, c) {
-        this.pos = pos;
+        this.pos = new Vector3(pos);
         this.c = new MyColor(c);
     }
 }

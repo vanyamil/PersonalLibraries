@@ -1,7 +1,7 @@
 class Ray {
 	constructor(src, dir) {
-    	this.src = createVector();
-    	this.dir = createVector();
+    	this.src = new Vector3();
+    	this.dir = new Vector3();
     	this.set(src, dir);
     	this.resetBounds();
 	}
@@ -13,7 +13,8 @@ class Ray {
     }
     
     setOther(other) {
-        this.set(other.src, other.dir);
+        this.src.setV(other.src);
+        this.dir.setV(other.dir);
         this.setBounds(other.min, other.max);
     }
     
@@ -39,13 +40,11 @@ class Ray {
     }
     
     at(t, outV) {
-        if(!(outV instanceof p5.Vector) || t < this.min || t > this.max) {
+        if(!(outV instanceof Vector3) || t < this.min || t > this.max) {
         	return false;
         }
         
-        outV.set(this.dir);
-        outV.mult(t);
-        outV.add(this.src);
+        outV.setV(this.dir).mult(t).add(this.src);
         return true;
     }
     

@@ -2,8 +2,8 @@ class Scene {
     constructor() {
         this.materials = {};
         this.lights = [];
-        this.setAmbient();
-        this.setBG(color(0));
+        this.setAmbient([0, 0, 0]);
+        this.setBG([0, 0, 0]);
         this.setSamples(1);
         this.reflDepth = 0;
         
@@ -35,8 +35,8 @@ class Scene {
         this.root = root;
     }
     
-    setBG(bgColor) {
-        this.bg = new MyColor(bgColor);
+    setBG(c) {
+        this.bg = new MyColor(c);
     }
     
     setAmbient(c) {
@@ -51,20 +51,13 @@ class Scene {
         this.materials[mat.name] = mat;
     }
     
-    reflect(v, n) {
-        const outV = n.copy();
-        outV.mult(2*outV.dot(v));
-        outV.sub(v);
-        return outV;
-    }
-    
     lighting(ray, IR) {
-        const shadowRay = new Ray(createVector(), createVector());
+        const shadowRay = new Ray();
         // Compute reflection ray
-        const reflV = this.reflect(ray.dir, IR.n);
+        const reflV = ray.dir.reflect(IR.n);
         reflV.mult(-1); // Now points away from surface
         
-        const lll = new MyColor();
+        const lll = new MyColor([0, 0, 0]);
         
         // Reflective 
         if(IR.material.reflectEnabled && ray.depth > 0) {
@@ -84,10 +77,10 @@ class Scene {
             // TODO for each light sample
             
             // Get light vector
-            const dv = p5.Vector.sub(l.pos, IR.p);
+            const dv = l.pos.copy().sub(IR.p);
             const dvm = dv.mag();
             if(dvm != 1) {
-            	dv.mult(1 / dvm);
+            	dv.div(dvm);
             }
             
             // Test shadow ray
@@ -148,12 +141,12 @@ class Scene {
             ray.setDepth(this.reflDepth);
             sumColor.add(this.getColor(ray, IR));
         }
-        sumColor.mult(1 / this.samples.length);
+        sumColor.div(this.samples.length);
         return sumColor.getFinal();
     }
     
     draw(timeLimit) {
-        const ray = new Ray(createVector(), createVector());
+        const ray = new Ray();
         const IR = new IntersectionResult();
         
         // Load the pixels into the back buffer
@@ -166,7 +159,7 @@ class Scene {
         
         // Interactive loop - can only go until time limit
         while(millis() < deadline) {
-        	set(x, y, this.getPixel(x, y, ray, IR));
+        	set(x, y, color(this.getPixel(x, y, ray, IR)));
         	x++;
         	if(x == this.cam.width) {
             	x = 0;
@@ -197,9 +190,9 @@ class SceneLoader {
     
     loadCamera(json) {
         const cam = new Camera(
-            createVector(...json.pos), // Pos
-            createVector(...json.lookAt), // Look at
-            createVector(...json.up) // Up
+            json.pos, 
+            json.lookAt, 
+            json.up 
         );
         cam.setScreen(json.screen.w, json.screen.h, json.fovy);
         return cam;
@@ -216,18 +209,18 @@ class SceneLoader {
         }       
         
         // Load material from scratch
-        const mat = new Material(typeof json.diffuse === "undefined" ? json.diffuse : color(json.diffuse));
+        const mat = new Material(json.diffuse);
         if(typeof json.name !== "undefined") {
             mat.name = json.name;
         }        
         if(typeof json.specExp !== "undefined") {
-            mat.setSpecular(json.specExp, typeof json.specular === "undefined" ? json.specular : color(json.specular));
+            mat.setSpecular(json.specExp, json.specular);
         }
         if(typeof json.reflect !== "undefined") {
             if(json.reflect === true) {
                 mat.setReflect();
             } else {
-            	mat.setReflect(color(json.reflect));
+            	mat.setReflect(json.reflect);
             }
         }
         
@@ -235,7 +228,8 @@ class SceneLoader {
     }
     
     loadLight(json) {
-        return new PointLight(createVector(...json.pos), color(json.color));
+        const c = json.color;
+        return new PointLight(json.pos, c);
     }
     
     loadInter(json) {
@@ -255,6 +249,7 @@ class SceneLoader {
             case "sphere": outp = this.loadSphere(json); break;
             case "box": outp = this.loadBox(json); break;
             case "transform": outp = this.loadTransform(json); break;
+            default: throw "You did not implement a loader for this object";
         }
         // Default material
         if(outp !== null && typeof json.material !== "undefined") {
@@ -292,18 +287,18 @@ class SceneLoader {
     }
     
     loadSphere(json) {
-        return new Sphere(createVector(...(json.pos || [0, 0, 0])), json.radius || 1);
+        return new Sphere(json.pos || [0, 0, 0], json.radius || 1);
     }
     
     loadBox(json) {
-        return new Box(createVector(...json.min), createVector(...json.max));
+        return new Box(json.min, json.max);
     }
     
     loadTransform(json) {
         const child = this.loadInter(json.child);
-        const t = (typeof json.translate === "undefined" ? createVector() : createVector(...json.translate));
-        const r = (typeof json.rotate === "undefined" ? createVector() : createVector(...json.rotate));
-        const s = (typeof json.scale === "undefined" ? 1 : (json.scale instanceof Array ? createVector(...json.scale) : json.scale));
+        const t = json.translate;
+        const r = (typeof json.rotate === "undefined" ? [0, 0, 0] : json.rotate);
+        const s = (typeof json.scale === "undefined" ? 1 : json.scale);
         
         return new MatrixTransform(child, t, r, s);
     }
@@ -317,10 +312,10 @@ class SceneLoader {
             this.scene.reflDepth = json.reflDepth;
         }
         if(typeof json.ambient !== "undefined") {
-            this.scene.setAmbient(color(json.ambient));
+            this.scene.setAmbient(json.ambient);
         }
         if(typeof json.bg !== "undefined") {
-            this.scene.setBG(color(json.bg));
+            this.scene.setBG(json.bg);
         }
         
         // Harder properties

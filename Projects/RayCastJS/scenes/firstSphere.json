@@ -1,0 +1,36 @@
+{
+    "ambient": 25,
+    "bg": [0, 100, 0],
+    "camera": {
+        "pos":    [0, 2, -7], 
+        "lookAt": [0, 0, 0],
+        "up":     [0, 1, 0],
+        "fovy":   45,
+        "screen": {
+            "w": 800,
+            "h": 450
+        }
+    },
+    "lights": [
+        {
+            "pos":   [-5, 8, -3],
+            "color": 255
+        }
+    ],
+    "materials": [
+        {
+            "name": "blue",
+            "diffuse": [0, 0, 255],
+            "specExp": 32
+        }
+    ],
+    "root": {
+        "type": "node",
+        "children": [
+            {
+                "type":   "sphere",
+                "material": "blue"
+            }
+        ]
+    }
+}
