@@ -203,31 +203,31 @@ class Box extends Intersectable {
         // For each of the 3 slabs - if putting in a loop, need to use reduce so that the interval test can follow each coord
         for(let i = 0; i < 3; i++) {
         	// Comments given as if for X - equivalent for other dims
-            const coord = Box.coords[i];
-            let d = ray.dir[coord];
-            const s = ray.src[coord];
+            const get = Box.getters[i];
+            let d = get(ray.dir);
+            const s = get(ray.src);
             
             if(d == 0) { // in the YZ plane
-                if(s <= this.min[coord] || s >= this.max[coord]) { // Out of X-slab
+                if(s <= get(this.min) || s >= get(this.max)) { // Out of X-slab
                     return false;
                 } // Else, fully in x-slab, keep interval as is
             } else {
                 // Low normal
                 const n = new Vector3();
-                n[coord] = 1;
                 // GOnna divide by d, so do so only once
                 d = 1 / d;
-                const tMin = (this.min[coord] - s) * d;
-                const tMax = (this.max[coord] - s) * d;
+                const tMin = (get(this.min) - s) * d;
+                const tMax = (get(this.max) - s) * d;
                 // Which t is smaller
                 let tLow, tHigh;
                 if(tMin < tMax) {
                     tLow = tMin;
                     tHigh = tMax;
-                    n[coord] *= -1;
+                    Box.setters[i](n, -1);
                 } else {
                     tLow = tMax;
                     tHigh = tMin;
+                	Box.setters[i](n, 1);
                 }
                 // Update interval and normals
                 if(interval[0] < tLow) {
@@ -259,4 +259,5 @@ class Box extends Intersectable {
     }
 }
 
-Box.coords = ["x", "y", "z"];
+Box.getters = [v => v.x, v => v.y, v => v.z];
+Box.setters = [((vec, val) => vec.x = val), ((vec, val) => vec.y = val), ((vec, val) => vec.z = val)]; 
