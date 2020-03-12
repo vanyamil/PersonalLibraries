@@ -21,8 +21,8 @@ class Scene {
         ];
         while(--v > 0) {
             this.samples.push([
-            	random(),
-            	random()
+            	Math.random(),
+            	Math.random()
             ]);
         }
     }
@@ -145,35 +145,35 @@ class Scene {
         return sumColor.getFinal();
     }
     
-    draw(timeLimit) {
+    draw(timeLimit, sketch) {
         const ray = new Ray();
         const IR = new IntersectionResult();
         
         // Load the pixels into the back buffer
-        loadPixels();
+        sketch.loadPixels();
         
         // Prepare the interactive loop
-        const deadline = millis() + timeLimit;
+        const deadline = sketch.millis() + timeLimit;
         let x = this.lastX;
         let y = this.lastY;
         
         // Interactive loop - can only go until time limit
-        while(millis() < deadline) {
-        	set(x, y, color(this.getPixel(x, y, ray, IR)));
+        while(sketch.millis() < deadline) {
+        	sketch.set(x, y, sketch.color(this.getPixel(x, y, ray, IR)));
         	x++;
         	if(x == this.cam.width) {
             	x = 0;
             	y++;
             	if(y == this.cam.height) {
                     // Put those pixels into main buffer/canvas
-                    updatePixels();
+                    sketch.updatePixels();
                     // We finished drawing
                 	return true;
             	}
         	}
         }
         // Put those pixels into main buffer/canvas
-        updatePixels();
+        sketch.updatePixels();
         // Not yet finished drawing, save state
         this.lastX = x;
         this.lastY = y;

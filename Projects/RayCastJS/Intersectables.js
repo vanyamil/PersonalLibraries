@@ -144,7 +144,7 @@ class Sphere extends Intersectable {
         if(det < 0) {
             return false;
         }
-        const sqrtDet = sqrt(det);
+        const sqrtDet = Math.sqrt(det);
         // Check lower value against ray bounds
         let t = -dp - sqrtDet;
         if(ray.at(t, outIR.p)) {
@@ -180,7 +180,7 @@ class Plane extends Intersectable {
         }
         let t = -ray.src.y / ray.dir.y;
         if(ray.at(t, outIR.p)) {
-            let b = floor(outIR.p.x) + floor(outIR.p.z);
+            let b = Math.floor(outIR.p.x) + Math.floor(outIR.p.z);
             let m = this.mat2 == null || ((b % 2) + 2) % 2 < 1 ? this.material : this.mat2;
             let n = ray.src.y > 0 ? new Vector3(0, 1, 0) : new Vector3(0, -1, 0);
             outIR.setIntersection(t, outIR.p, n, m);

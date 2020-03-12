@@ -298,8 +298,8 @@ class Matrix4 {
     rotateY(v) {
         const by = new Matrix4();
         v *= Math.PI / 180;
-        const c = cos(v);
-        const s = sin(v);
+        const c = Math.cos(v);
+        const s = Math.sin(v);
         by.m[0] = c;
         by.m[2] = s;
         by.m[8] = -s;
@@ -310,8 +310,8 @@ class Matrix4 {
     rotateZ(v) {
         const by = new Matrix4();
         v *= Math.PI / 180;
-        const c = cos(v);
-        const s = sin(v);
+        const c = Math.cos(v);
+        const s = Math.sin(v);
         by.m[0] = c;
         by.m[1] = -s;
         by.m[4] = s;
