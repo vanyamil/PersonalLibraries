@@ -1,4 +1,5 @@
-#Built for HackerRank's 'Office Prices' challenge
+#Built for HackerRank's 'Office Prices' challenge, following Yoshua Bengio's lecture in UdeM, summer 2014.
+# Author: Ivan Miloslavov
 import numpy as np
 from time import time
 from numpy.random import random as rndarray
