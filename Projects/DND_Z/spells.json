@@ -1,0 +1,49 @@
+{
+	"spells": [
+		{
+			"name": "Acid Splash",
+			"level": 0,
+			"school": "Evocation",
+			"type": "Combat",
+			"target": "multi",
+			"defense": "save",
+			"casting": "1 action",
+			"range": "60 feet",
+			"verbal": true,
+			"somatic": true,
+			"material": false,
+			"duration": "Instantaneous",
+			"description": "You hurl a bubble of acid. Choose one creature within range, or choose two creatures within range that are within 5 feet of each other. A target must succeed on a Dexterity saving throw or take 1d6 acid damage. <br /> This spell's damage increases by 1d6 when you reach 5th level (2d6), 11th level (3d6), and 17th level (4d6)."
+		},
+		{
+			"name": "Burning Hands",
+			"level": 1,
+			"school": "Evocation",
+			"type": "Combat",
+			"target": "multi",
+			"defense": "save",
+			"casting": "1 action",
+			"range": "Self; 15-foot cone",
+			"verbal": true,
+			"somatic": true,
+			"material": false,
+			"duration": "Instantaneous",
+			"description": "A thin sheet of flames shoots forth from your outstretched fingertips. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 fire damage on a failed save, or half as much damage on a successful one.  The fire ignites any flammable objects in the area that aren’t being worn or carried. "
+		},
+		{
+			"name": "Druidcraft",
+			"level": 0,
+			"school": "Transmutation",
+			"type": "Roleplay",
+			"target": "none",
+			"defense": "none",
+			"casting": "1 action",
+			"range": "30 feet",
+			"verbal": true,
+			"somatic": true,
+			"material": false,
+			"duration": "Instantaneous",
+			"description": "Whispering to the spirits of nature, you create one of the following effects within range: <ul> <li>You create a tiny, harmless sensory effect that predicts what the weather will be and how and if it will change, at your current location for the next 24 hours. This effect persists for 1 round.</li> <li>You instantly make a flower blossom, a seed pod open, or a leaf bud bloom.</li> <li>You restore a withered nonmagical plant or 5-foot patch of shrubbery to life.</li> <li> You create an instantaneous, harmless sensory effect, such as falling leaves, a puff of wind, the sound of a small animal, or the faint odor of skunk. the effect must fit in a 5-foot cube.</li> <li>You change the color of a single insect or plant of your choosing. This effect persists for 1 hour.</li> </ul>"
+		}
+	]
+}

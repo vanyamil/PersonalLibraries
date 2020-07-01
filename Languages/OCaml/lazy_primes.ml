@@ -27,7 +27,7 @@ let no_mults ps s = filter (fun n -> List.for_all (fun p -> n mod p <> 0) ps) s 
 (* The sieve of Erasthothenes as an infinite stream *)
 let rec sieve ps s = ({ hd = s.hd; tl = fun () -> sieve (ps @ [s.hd]) (no_mults ps (next s)) }) ;;
 
-let primes = sieve [2] (arith 2 3) ;;
+let primes = {hd = 2; tl = fun () -> sieve [2] (arith 2 3) } ;;
 
 let penta n = n * (3 * n - 1) / 2 ;;
 let pentaStr = map penta naturals ;;
