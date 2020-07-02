@@ -11,15 +11,14 @@ class VoteController extends Controller
 
 		// Get two random cards such that they haven't been seen too much
 		// Theoretically possible that only 1 card is found, but highly unlikely
-		[$card1, $card2] = app('db')->table('cards')
-									->where('matchups', '<', max_matchups())
-									->inRandomOrder()
-									->take(2)
-									->get();
+		[$card1, $card2] = Card::where('matchups', '<', max_matchups())
+							   ->inRandomOrder()
+							   ->take(2)
+							   ->get();
 
 		// Obtain image URLs
-		$card1->link = get_image_link($card1->scryfall_id);
-		$card2->link = get_image_link($card2->scryfall_id);
+		$card1->link = get_image_link($card1->id);
+		$card2->link = get_image_link($card2->id);
 
 		return [$card1, $card2];
 	}
@@ -30,23 +29,17 @@ class VoteController extends Controller
 
 		// Extra check for matchups
 		$max_matchups = max_matchups();
-		$winner_matchups = app('db')->table('cards')
-				 					->where('scryfall_id', $input['winner'])
-				 					->value('matchups');
-		$loser_matchups = app('db')->table('cards')
-				 				   ->where('scryfall_id', $input['loser'])
-				 				   ->value('matchups');
+		$winner_matchups = Card::find($input['winner'], 'matchups');
+		$loser_matchups = Card::find($input['loser'], 'matchups');
 		if($winner_matchups >= $max_matchups || $loser_matchups >= $max_matchups) {
 			return response("Overplayed matchup", 403);
 		}
 
 		// Save vote
-		app('db')->table('matchups')->insert($input);
+		Vote::insert($input);
 
 		// Update card matchup values
-		app('db')->table('cards')
-				 ->where('scryfall_id', $input['winner'])
-				 ->orWhere('scryfall_id', $input['loser'])
-				 ->increment('matchups');
+		Card::whereKey([$input['winner'], $input['loser']])
+			->increment('matchups');
 	}
 }

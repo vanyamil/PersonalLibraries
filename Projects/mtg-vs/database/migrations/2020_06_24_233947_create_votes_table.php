@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMatchupsTable extends Migration
+class CreateVotesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,11 @@ class CreateMatchupsTable extends Migration
      */
     public function up()
     {
-        Schema::create('matchups', function (Blueprint $table) {
+        Schema::create('votes', function (Blueprint $table) {
             $table->id();
+
+            $table->char('tournament_id', 9)
+                  ->index();
 
             $table->uuid('winner')
                   ->index();
@@ -30,6 +33,11 @@ class CreateMatchupsTable extends Migration
                   ->useCurrent();
 
             /*********************/
+
+            $table->foreign('tournament_id')
+                  ->references('id')
+                  ->on('tournaments')
+                  ->onDelete('cascade');
 
             $table->foreign('winner')
                   ->references('scryfall_id')
@@ -48,6 +56,6 @@ class CreateMatchupsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('matchups');
+        Schema::dropIfExists('votes');
     }
 }

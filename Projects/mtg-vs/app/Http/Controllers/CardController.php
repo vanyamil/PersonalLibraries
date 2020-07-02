@@ -12,19 +12,21 @@ class CardController extends Controller
 
 	public function random() {
 		// Get one random ID
-		$card = app('db')->table('cards')->inRandomOrder()->value('scryfall_id');
+		$cardCount = Card::count();
+		$counter = rand(0, $cardCount - 1);
+		$id = Card::skip($counter)->value('id');
 
-		return redirect()->route('card', ['id' => $card]);
+		return redirect()->route('card', compact('id'));
 	}
 
 	public function named(Request $request) {
 		$name = $request->input('name');
 
 		// Check if name is exact in our database
-		$query = app('db')->table('cards')->where('name', $name);
+		$query = Card::where('name', $name);
 
 		if($query->count() > 0) {
-			$card = $query->value('scryfall_id');
+			$card = $query->value('id');
 			return redirect()->route('card', ['id' => $card]);
 		} else {
 			return redirect()->route('card', ['id' => $name]);
@@ -32,8 +34,7 @@ class CardController extends Controller
 	}
 
 	public function view($id) {
-		$card = app('db')->table('cards')->where('scryfall_id', $id)->first()
-			?? $id;
+		$card = Card::find($id) ?? $id;
 		$matchups = app('db')->table('matchups')
 							 ->where('winner', $id)
 							 ->orWhere('loser', $id)

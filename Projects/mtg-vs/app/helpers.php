@@ -13,5 +13,9 @@ function max_matchups() {
 }
 
 function name_from_id($id) {
-	return app('db')->table('cards')->where('scryfall_id', $id)->value('name');
+	return app('db')->table('cards')->find($id, 'name');
+}
+
+function method_field($method) {
+	return "<input type='hidden' name='_method' value='$method' />";
 }

@@ -17,13 +17,27 @@ class CreateTournamentsTable extends Migration
             $table->char('id', 9)
                   ->primary();
 
-            $table->string('name', 100);
+            $table->char('password', 9);
 
-            $table->boolean('public');
+            $table->timestamp('start_time');
 
             $table->timestamp('due_at');
 
+            $table->boolean('active')
+                  ->default(0);
+
+            $table->boolean('public');
+
+            $table->enum('type', [
+                'round-robin',
+                'fixed-pairs'
+            ]);
+
             $table->timestamps();
+
+            $table->string('name', 100);
+
+            $table->text('description');
         });
     }
 
