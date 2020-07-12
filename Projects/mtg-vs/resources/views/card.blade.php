@@ -25,22 +25,22 @@ $has_card = !is_string($card);
 	<div class="row">
 		<div class="col-8 offset-2 col-md-6 offset-md-0">
 
-			<img class="img-fluid" src="{{ route('image', ['id' => $card->scryfall_id]) }}" />
+			<img class="img-fluid" src="{{ route('image', ['id' => $card->id]) }}" />
 		</div>
 		<div class="col-md-6">
 			<div class="text-center display-3 border border-primary rounded-pill my-2" style="background-color: lavender">
 				<span class="text-success">
-					{{ $matchups->where('winner', $card->scryfall_id)->count() }}W
+					{{ $matchups->where('winner', $card->id)->count() }}W
 				</span>
 				 - 
 				<span class="text-danger">
-					{{ $matchups->where('loser', $card->scryfall_id)->count() }}L
+					{{ $matchups->where('loser', $card->id)->count() }}L
 				</span>
 			</div>
 			<ul class="list-group list-group-flush">
 				@foreach($matchups as $matchup)
 				@php 
-					$won = $matchup->winner == $card->scryfall_id;
+					$won = $matchup->winner == $card->id;
 					$opponent = $won ? $matchup->loser : $matchup->winner;
 				@endphp
 				<li class="list-group-item {{ $won ? "list-group-item-success" : "list-group-item-danger"}}">

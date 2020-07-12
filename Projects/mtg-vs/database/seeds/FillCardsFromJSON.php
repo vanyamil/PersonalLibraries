@@ -2,6 +2,8 @@
 
 use Illuminate\Database\Seeder;
 
+use App\Card;
+
 class FillCardsFromJSON extends Seeder
 {
     /**
@@ -11,11 +13,16 @@ class FillCardsFromJSON extends Seeder
      */
     public function run()
     {
-    	$cast = function($obj) { return (array) $obj; };
+    	$cast = function($obj) { 
+            return [
+                'name' => $obj->name,
+                'id' => $obj->scryfall_id
+            ]; 
+        };
 
     	$list = json_decode(file_get_contents("oracle-cards-short.json"));
     	$true_list = array_map($cast, $list);
 
-        app('db')->table('cards')->insert($true_list);
+        Card::insert($true_list);
     }
 }

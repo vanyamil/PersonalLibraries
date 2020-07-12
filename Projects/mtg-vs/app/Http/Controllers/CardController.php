@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Card;
 use Illuminate\Http\Request;
 
 class CardController extends Controller
 {
 	public function name_from_id($id) {
-		return name_from_id($id);
+		return Card::name_from_id($id);
 	}
 
 	public function random() {
 		// Get one random ID
-		$cardCount = Card::count();
-		$counter = rand(0, $cardCount - 1);
-		$id = Card::skip($counter)->value('id');
+		$id = Card::random(true);
 
 		return redirect()->route('card', compact('id'));
 	}

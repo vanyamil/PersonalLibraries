@@ -10,6 +10,8 @@
 
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.bootstrap_4.min.css" integrity="sha256-vFn0MM8utz2N3JoNzRxHXUtfCJLz5Pb9ygBY2exIaqg=" crossorigin="anonymous" />
 
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+
 		@yield('style')
 	</head>
 	<body>
@@ -27,9 +29,9 @@
 							@endif
 						</a>
 					</li>
-					<li class="nav-item {{ request()->is('vote') ? "active" : "" }}">
-						<a class="nav-link" href="/vote">Vote 
-							@if(request()->is('vote'))
+					<li class="nav-item {{ request()->is('tournaments/*') ? "active" : "" }}">
+						<a class="nav-link" href="/tournaments">Vote 
+							@if(request()->is('tournaments/*'))
 							<span class="sr-only">(current)</span>
 							@endif
 						</a>

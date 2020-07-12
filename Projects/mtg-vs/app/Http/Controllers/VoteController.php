@@ -6,24 +6,30 @@ use Illuminate\Http\Request;
 
 class VoteController extends Controller
 {
-	public function generate() {
-		// How many more matchups than the min can the cards have?
+	public function generate($tournament) {
 
-		// Get two random cards such that they haven't been seen too much
-		// Theoretically possible that only 1 card is found, but highly unlikely
-		[$card1, $card2] = Card::where('matchups', '<', max_matchups())
-							   ->inRandomOrder()
-							   ->take(2)
-							   ->get();
+		// For round-robin - just random 2 cards
+		if($tournament->type == "round-robin") {
+			[$card1, $card2] = Card::inTournament($tournament)
+								->inRandomOrder()
+								->take(2)
+								->get();
+		} else {
+			// In fixed-pairs, return an existing matchup instead
+			// TODO add voter tracking, and maybe randomization of sides?
 
-		// Obtain image URLs
-		$card1->link = get_image_link($card1->id);
-		$card2->link = get_image_link($card2->id);
+			[$card1, $card2] = Matchup::where('tournament_id', $tournament)
+									->inRandomOrder()
+									->first()
+									->cards();
+		}
 
 		return [$card1, $card2];
 	}
 
-	public function save_vote(Request $request) {
+	public function save_vote($tournament, Request $request) {
+		// TODO fully
+
 		$input = $request->all(); 
 		// winner, loser, ordered - rest is auto-populated
 

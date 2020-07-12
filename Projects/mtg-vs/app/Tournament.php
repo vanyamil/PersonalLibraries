@@ -38,11 +38,19 @@ class Tournament extends Model
     ];
 
     /**
-     * Get the cards that participate in this round-robin tournament.
+     * Get the cards that participate in this tournament.
      */
     public function cards()
     {
-        return $this->belongsToMany('App\Card', 'round_robin_cards');
+        return $this->belongsToMany('App\Card', 'participations')->withPivot(['wins', 'losses']);
+    }
+
+    /**
+     * Get the matchups registered for this tournament.
+     */
+    public function matchups()
+    {
+        return $this->hasMany('App\Matchup');
     }
 
     /**
@@ -52,6 +60,4 @@ class Tournament extends Model
     {
         return $this->hasMany('App\Vote');
     }
-
-
 }

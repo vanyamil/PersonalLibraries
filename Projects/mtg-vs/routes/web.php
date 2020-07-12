@@ -13,18 +13,10 @@
 
 use Illuminate\Http\Request;
 
-use App\Tournament;
-
 $router->get('/', function () {
 	$votecount = app('db')->table('matchups')->count();
     return view('welcome', compact('votecount'));
 });
-
-$router->get('/vote', function () {
-    return view('matchup');
-});
-$router->get('/vote/new', 'VoteController@generate');
-$router->post('/vote', 'VoteController@save_vote');
 
 $router->get('/card/random', 'CardController@random');
 $router->get('/card/named', 'CardController@named');
@@ -63,6 +55,16 @@ $router->group(['prefix' => 'tournaments'], function($router) {
 			'uses' => 'TournamentController@show'
 		]);
 
+		$router->get('vote', [
+			'as' => 'tournaments.votes.create',
+			'uses' => 'VoteController@generate'
+		]);
+
+		$router->post('vote', [
+			'as' => 'tournaments.votes.store',
+			'uses' => 'VoteController@save_vote'
+		]);
+
 		$router->get('edit', [
 			'as' => 'tournaments.edit',
 			'uses' => 'TournamentController@edit'
@@ -76,6 +78,40 @@ $router->group(['prefix' => 'tournaments'], function($router) {
 		$router->delete('/', [
 			'as' => 'tournaments.destroy',
 			'uses' => 'TournamentController@destroy'
+		]);
+
+		// Edit list of participants
+		$router->get('cards', [
+			'as' => 'tournaments.cards.index',
+			'uses' => 'TournamentController@cards'
+		]);
+
+		// Delete list of participants
+		$router->delete('cards/one', [
+			'as' => 'tournaments.cards.delete',
+			'uses' => 'TournamentController@deleteCard'
+		]);
+
+		// Delete list of participants
+		$router->delete('cards/all', [
+			'as' => 'tournaments.cards.destroy',
+			'uses' => 'TournamentController@destroyCards'
+		]);
+
+		$router->post('cards/one', [
+			'as' => 'tournaments.cards.addSingle',
+			'uses' => 'TournamentController@addSingle'
+		]);
+
+		$router->post('cards/many', [
+			'as' => 'tournaments.cards.addMulti',
+			'uses' => 'TournamentController@addMulti'
+		]);
+
+		// Edit matchups
+		$router->get('matchups', [
+			'as' => 'tournaments.matchups.index',
+			'uses' => 'TournamentController@matchups'
 		]);
 	});
 });

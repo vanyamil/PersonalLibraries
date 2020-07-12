@@ -20,6 +20,33 @@
 			<a class="btn btn-block btn-warning" href="{{route('tournaments.create')}}">Create New</a>
 		</div>
 	</div>
+
+	<h2> Upcoming tournaments </h2>
+	<ul class="list-group">
+		@foreach($upcoming as $tournament)
+		<li class="list-group-item">
+			{{ $tournament->name }} {{ $tournament->id }} {{ $tournament->password }}
+		</li>
+		@endforeach
+	</ul>
+
+	<h2> Current tournaments </h2>
+	<ul class="list-group">
+		@foreach($running as $tournament)
+		<li class="list-group-item">
+			{{ $tournament->name }} {{ $tournament->id }} {{ $tournament->password }}
+		</li>
+		@endforeach
+	</ul>
+
+	<h2> Complete tournaments </h2>
+	<ul class="list-group">
+		@foreach($complete as $tournament)
+		<li class="list-group-item">
+			{{ $tournament->name }} {{ $tournament->id }} {{ $tournament->password }}
+		</li>
+		@endforeach
+	</ul>
 </div>
 
 @endsection

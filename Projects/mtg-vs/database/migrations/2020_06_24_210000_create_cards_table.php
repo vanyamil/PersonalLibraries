@@ -18,10 +18,6 @@ class CreateCardsTable extends Migration
                   ->primary();
 
             $table->string('name', 150)->index();
-
-            $table->integer('matchups')
-                  ->default(0)
-                  ->index();
         });
     }
 

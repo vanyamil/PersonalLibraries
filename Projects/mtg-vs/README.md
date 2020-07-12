@@ -22,3 +22,12 @@ If you discover a security vulnerability within Lumen, please send an e-mail to 
 ## License
 
 The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+Force of Will
+Emrakul, the Aeons Torn
+Liliana of the Veil
+Necropotence
+Serra Angel
+Swords to Plowshares
+Time Walk
+Brainstorm

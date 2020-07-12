@@ -19,3 +19,7 @@ function name_from_id($id) {
 function method_field($method) {
 	return "<input type='hidden' name='_method' value='$method' />";
 }
+
+function now() {
+	return Carbon\Carbon::now();
+}

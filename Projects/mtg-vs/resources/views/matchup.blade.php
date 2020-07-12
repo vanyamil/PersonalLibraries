@@ -7,6 +7,9 @@
 	<div class="row mt-3">
 		<div class="col text-center" id="welcome">
 			<h2>Welcome to MTG VS!</h2>
+			<p>You are voting on the tournament <b>{{ $tournament->name }}</b> </p>
+			<small>Description:</small>
+			<p>{{ $tournament->description }} </p>
 			<p>Press Start when you're ready to vote! </p>
 			<input type="text" placeholder="Username (optional)" id="username" maxlength="20" autocomplete="off" />
 			<br />
@@ -45,10 +48,12 @@
 <script>
 	let username = "";
 
+	const route = "{{ route('tournaments.votes.create', compact('tournament')) }}";
+
 	function regen() {
-		$.getJSON("/vote/new", function(data) {
-			$("#card0-btn").attr("data-id", data[0]["scryfall_id"]);
-			$("#card1-btn").attr("data-id", data[1]["scryfall_id"]);
+		$.getJSON(route, function(data) {
+			$("#card0-btn").attr("data-id", data[0]["id"]);
+			$("#card1-btn").attr("data-id", data[1]["id"]);
 			$("#card0-img").attr("src", data[0]["link"]);
 			$("#card1-img").attr("src", data[1]["link"]);
 			$("#card0-title").text(data[0]["name"]);
@@ -80,7 +85,7 @@
 			$("#card0-card").addClass("bg-success text-white");
 			$("#card1-card").addClass("bg-danger text-white");
 
-			$.post("/vote", {
+			$.post(route, {
 				winner: $("#card0-btn").attr("data-id"),
 				loser: $("#card1-btn").attr("data-id"),
 				ordered: 1,
@@ -94,7 +99,7 @@
 			$("#card0-card").addClass("bg-danger text-white");
 			$("#card1-card").addClass("bg-success text-white");
 
-			$.post("/vote", {
+			$.post(route, {
 				winner: $("#card1-btn").attr("data-id"),
 				loser: $("#card0-btn").attr("data-id"),
 				ordered: 0,

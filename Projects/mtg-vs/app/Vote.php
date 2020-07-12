@@ -12,30 +12,22 @@ class Vote extends Model
      * @var array
      */
     protected $dates = [
-        'voted_at', 
+        'voted_at'
     ];
 
     /**
-     * Get the tournament for which this vote was cast.
+     * Get the matchup for which this vote was cast.
      */
-    public function cards()
+    public function matchup()
     {
-        return $this->belongsTo('App\Tournament');
+        return $this->belongsTo('App\Matchup');
     }
 
     /**
-     * Get the winning card.
+     * Get the tournament for which this vote is recorded.
      */
-    public function winner()
+    public function tournament()
     {
-        return $this->belongsTo('App\Card', 'winner', 'scryfall_id');
-    }
-
-    /**
-     * Get the losing card.
-     */
-    public function loser()
-    {
-        return $this->belongsTo('App\Card', 'loser', 'scryfall_id');
+        return $this->matchup()->tournament();
     }
 }
