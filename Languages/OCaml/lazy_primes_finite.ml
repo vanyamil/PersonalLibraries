@@ -61,3 +61,20 @@ let rec sieve ps s () =
 ;;
 
 let primes = sieve [2] (arith 2 3) ;;
+
+(* Using Seq module *)
+
+let rec arith by n () = Seq.Cons (n, arith by (n + by)) ;;
+let naturals = arith 1 0 ;;
+let first_10 = Seq.take 10 naturals ;;
+
+let no_mults ps s = Seq.filter (fun n -> List.for_all (fun p -> n mod p <> 0) ps) s ;;
+
+let rec sieve ps s () =
+	let Seq.Cons (n, t) = s () in
+	let new_no_mults = no_mults ps t in
+	let t' = sieve (ps @ [n]) new_no_mults in
+	Seq.Cons (n, t')
+;;
+
+let primes = sieve [2] (arith 2 3) ;;
