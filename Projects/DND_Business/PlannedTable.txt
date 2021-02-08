@@ -1,0 +1,15 @@
+Crits
+
+1/100: Cursed/Blessed by the story
+2/99: Magical Mis/Fortune
+3/98: Weather or natural event
+4/97: Run in
+5/96: Staff 
+
+for each step of length X, choose X/10 random numbers (could even have the players call them live) for complications. 
+
+Complications:
+- Law (guard gets tipped something about your business is shady) 
+- Guild fees 
+- Crime happens in business
+- 
