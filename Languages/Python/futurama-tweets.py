@@ -116,22 +116,55 @@ def countProperlyAll(l, debug = False):
 	_sum = 1
 
 	for curr in genAll(l):
-		expectedOfCycle = total / sum(curr)
+		# expectedOfCycle = total / sum(curr) # removing to reduce use of total
 		sum_over_inc = 0
+		prev = list(curr)
 		
 		for idx in range(n):
 			if curr[idx] < l[idx]:
-				prev = list(curr)
 				prev[idx] += 1
-				sum_over_inc += mapping[tuple(prev)] * prev[idx] / total
+				sum_over_inc += mapping[tuple(prev)] * prev[idx] # / total
+				prev[idx] -= 1
 
-		temp = sum_over_inc * expectedOfCycle
+		temp = sum_over_inc / sum(curr) # * expectedOfCycle
 		mapping[curr] = temp
 		_sum += temp
 
 	if debug:
 		for key, val in mapping.items():
 			print(",".join(str(x) for x in key) + " - " + str(val))
+
+	return _sum
+
+# A slightly more optimized version specifically for calculating 2 episodes
+def countTwoEpisodes(a, b, debug = False):
+	small, big = (a, b) if a < b else (b, a)
+	total = small + big
+
+	# Generate first row
+	lastRow = [1]
+
+	for rem in range(small - 1, 0, -1):
+		here = lastRow[-1] * (rem + 1) / (rem + big)
+		lastRow.append(here)
+		if debug:
+			print(f"{big}, {rem} : {here}")
+
+	_sum = sum(lastRow)
+	# Each successive row
+	for rem_big in range(big - 1, 0, -1):
+		first_entry = lastRow[0] * (rem_big + 1) / (small + rem_big)
+		lastRow[0] = first_entry
+		_sum += first_entry
+
+		for col in range(1, small):
+			rem_small = small - col
+			here = (lastRow[col] * (rem_big + 1) + lastRow[col - 1] * (rem_small + 1)) / (rem_small + rem_big)
+			lastRow[col] = here
+			_sum += here
+
+			if debug:
+				print(f"{rem_big}, {rem_small} : {here}")
 
 	return _sum
 
